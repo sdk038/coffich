@@ -10,11 +10,11 @@ services:
       - key: DJANGO_DEBUG
         value: "0"
       - key: DJANGO_ALLOWED_HOSTS
-        value: coffich-backend.onrender.com
-      - key: DJANGO_CORS_ORIGINS
-        value: https://coffich-frontend.onrender.com
+        value: localhost,127.0.0.1
+      - key: DJANGO_CORS_ALLOW_ALL_ORIGINS
+        value: "1"
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
-        value: https://coffich-frontend.onrender.com
+        sync: false
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: SMSTO_API_KEY
@@ -33,7 +33,7 @@ services:
     pullRequestPreviewsEnabled: false
     envVars:
       - key: REACT_APP_API_URL
-        value: https://coffich-backend.onrender.com
+        sync: false
     routes:
       - type: rewrite
         source: /*

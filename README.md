@@ -17,5 +17,9 @@ After creating services, set real SMS.to values in backend environment:
 - `SMSTO_API_KEY`
 - `SMSTO_SENDER_ID` (e.g. `SMSto`)
 - `SMSTO_BASE_URL` (default `https://api.sms.to`)
+- `DJANGO_CSRF_TRUSTED_ORIGINS` (your frontend URL, e.g. `https://coffich-frontend.onrender.com`)
+
+Frontend service env:
+- `REACT_APP_API_URL` (your backend URL, e.g. `https://coffich-backend.onrender.com`)
 
 Without valid SMS.to credentials, OTP SMS delivery will fail and API returns `503`.

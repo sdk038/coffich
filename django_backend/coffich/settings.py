@@ -28,6 +28,9 @@ ALLOWED_HOSTS = [
     for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_host and render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_host)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -120,7 +123,11 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = (
+    DEBUG
+    or os.environ.get("DJANGO_CORS_ALLOW_ALL_ORIGINS", "0")
+    in ("1", "true", "True")
+)
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = [
         o.strip()
