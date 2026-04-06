@@ -10,6 +10,9 @@ This repo includes `render.yaml` for deploying both services:
 - `coffich-backend` (Django API)
 - `coffich-frontend` (static React build)
 
+One-click Blueprint deploy:
+- https://render.com/deploy?repo=https://github.com/sdk038/coffich
+
 After creating services, set real Twilio values in backend environment:
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
