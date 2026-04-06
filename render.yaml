@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: coffich-backend
+    runtime: python
+    rootDir: django_backend
+    plan: starter
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --no-input
+    startCommand: gunicorn coffich.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: coffich-backend.onrender.com
+      - key: DJANGO_CORS_ORIGINS
+        value: https://coffich-frontend.onrender.com
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: https://coffich-frontend.onrender.com
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+
+  - type: static
+    name: coffich-frontend
+    rootDir: frontend
+    plan: starter
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://coffich-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

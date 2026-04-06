@@ -1,0 +1,23 @@
+.DS_Store
+.idea/
+
+# Legacy Strapi folder (not used in production now)
+backend/
+
+# Django
+django_backend/venv/
+django_backend/__pycache__/
+django_backend/**/*.pyc
+django_backend/db.sqlite3
+django_backend/media/
+django_backend/staticfiles/
+django_backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local

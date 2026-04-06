@@ -1,0 +1,220 @@
+.cart-page {
+  padding: var(--space-xl) var(--space-md);
+  padding-bottom: calc(var(--space-xl) * 1.5);
+}
+
+.cart-page__inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.cart-page__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.cart-page__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  margin: 0;
+}
+
+.cart-page__clear {
+  font-size: 0.9rem;
+  color: var(--color-accent-soft);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.cart-page__clear:hover {
+  color: var(--color-accent);
+}
+
+.cart-page__auth {
+  margin: 0 0 var(--space-lg);
+  padding: var(--space-md);
+  background: rgba(139, 69, 24, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.cart-page__auth a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.cart-page__empty {
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-md);
+}
+
+.cart-page__link {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.cart-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: 72px 1fr auto auto auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-sm);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px var(--color-shadow);
+}
+
+@media (max-width: 560px) {
+  .cart-line {
+    grid-template-columns: 56px 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .cart-line__qty {
+    grid-column: 2;
+  }
+
+  .cart-line__sum {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .cart-line__remove {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+}
+
+.cart-line__img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.cart-line__ph {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  background: #e8e0d6;
+}
+
+.cart-line__cat {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-soft);
+}
+
+.cart-line__title {
+  font-size: 1.05rem;
+  margin: 0 0 0.15rem;
+  font-family: var(--font-display);
+}
+
+.cart-line__unit {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+}
+
+.cart-line__qty {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cart-line__qty-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.cart-line__qty-val {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.cart-line__sum {
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.cart-line__remove {
+  border: none;
+  background: transparent;
+  color: var(--color-ink-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.cart-line__remove:hover {
+  color: #a34;
+}
+
+.cart-page__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 2px solid var(--color-highlight);
+  font-size: 1.15rem;
+}
+
+.cart-page__total strong {
+  font-size: 1.35rem;
+  color: var(--color-accent);
+}
+
+.cart-page__note {
+  margin: var(--space-md) 0;
+  font-size: 0.92rem;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.cart-page__checkout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--color-highlight) 0%, #c4956a 100%);
+  color: #2a1a0a;
+  text-decoration: none;
+}
+
+.cart-page__checkout:hover {
+  text-decoration: none;
+  opacity: 0.95;
+}

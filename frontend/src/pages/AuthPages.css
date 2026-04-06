@@ -1,0 +1,119 @@
+.auth-page {
+  padding: var(--space-xl) var(--space-md);
+  padding-bottom: calc(var(--space-xl) * 1.5);
+}
+
+.auth-page__inner {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.auth-page__title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 var(--space-sm);
+  font-family: var(--font-display);
+}
+
+.auth-page__lead {
+  margin: 0 0 var(--space-lg);
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+}
+
+.auth-page__footer {
+  margin-top: var(--space-lg);
+  color: var(--color-ink-muted);
+  font-size: 0.95rem;
+}
+
+.auth-page__footer a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.auth-page__cta {
+  display: inline-block;
+  margin-top: var(--space-md);
+  text-align: center;
+  text-decoration: none;
+}
+
+.auth-form__field {
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.auth-form__label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+  color: var(--color-ink-muted);
+}
+
+.auth-form__input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  background: var(--color-surface);
+  box-sizing: border-box;
+}
+
+.auth-form__input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.auth-form__error {
+  color: #8b2e2e;
+  font-size: 0.92rem;
+  margin: 0 0 var(--space-md);
+  line-height: 1.45;
+}
+
+.auth-form__info {
+  color: #2f6d2f;
+  font-size: 0.92rem;
+  margin: 0 0 var(--space-md);
+  line-height: 1.45;
+}
+
+.auth-form__submit {
+  width: 100%;
+  margin-top: var(--space-sm);
+}
+
+.auth-page__secondary {
+  width: 100%;
+  margin: 0 0 var(--space-md);
+}
+
+.profile-page__dl {
+  margin: 0;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.profile-page__row {
+  margin: 0;
+}
+
+.profile-page__dt {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-soft);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.profile-page__dd {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.profile-page__actions {
+  margin-top: var(--space-xl);
+}
