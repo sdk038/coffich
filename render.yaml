@@ -17,12 +17,12 @@ services:
         value: https://coffich-frontend.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: TWILIO_ACCOUNT_SID
+      - key: SMSTO_API_KEY
         sync: false
-      - key: TWILIO_AUTH_TOKEN
-        sync: false
-      - key: TWILIO_FROM_NUMBER
-        sync: false
+      - key: SMSTO_SENDER_ID
+        value: SMSto
+      - key: SMSTO_BASE_URL
+        value: https://api.sms.to
 
   - type: static_site
     name: coffich-frontend

@@ -13,9 +13,9 @@ This repo includes `render.yaml` for deploying both services:
 One-click Blueprint deploy:
 - https://render.com/deploy?repo=https://github.com/sdk038/coffich
 
-After creating services, set real Twilio values in backend environment:
-- `TWILIO_ACCOUNT_SID`
-- `TWILIO_AUTH_TOKEN`
-- `TWILIO_FROM_NUMBER`
+After creating services, set real SMS.to values in backend environment:
+- `SMSTO_API_KEY`
+- `SMSTO_SENDER_ID` (e.g. `SMSto`)
+- `SMSTO_BASE_URL` (default `https://api.sms.to`)
 
-Without valid Twilio credentials, OTP SMS delivery will fail and API returns `503`.
+Without valid SMS.to credentials, OTP SMS delivery will fail and API returns `503`.

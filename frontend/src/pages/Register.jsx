@@ -39,7 +39,7 @@ export default function Register() {
           <h1 className="auth-page__title">Код отправлен</h1>
           <p className="auth-page__lead">
             На номер <strong>{phone.trim()}</strong> отправлен 4-значный код входа.
-            Если Twilio не настроен, код виден в логе сервера Django (режим разработки).
+            Если SMS.to не настроен, сервер вернёт ошибку отправки (503).
           </p>
           <Link
             className="btn btn--primary auth-page__cta"

@@ -134,7 +134,7 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
-# SMS (Twilio) — см. accounts/sms.py и .env.example
-TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")
-TWILIO_FROM_NUMBER = os.environ.get("TWILIO_FROM_NUMBER", "")
+# SMS.to — см. accounts/sms.py и .env.example
+SMSTO_API_KEY = os.environ.get("SMSTO_API_KEY", "")
+SMSTO_SENDER_ID = os.environ.get("SMSTO_SENDER_ID", "SMSto")
+SMSTO_BASE_URL = os.environ.get("SMSTO_BASE_URL", "https://api.sms.to")
