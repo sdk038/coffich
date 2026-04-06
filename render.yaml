@@ -24,7 +24,7 @@ services:
       - key: TWILIO_FROM_NUMBER
         sync: false
 
-  - type: static
+  - type: static_site
     name: coffich-frontend
     rootDir: frontend
     plan: starter
