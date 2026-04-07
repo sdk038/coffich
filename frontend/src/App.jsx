@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ShopProvider } from './context/ShopContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -15,7 +15,7 @@ import './App.css';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ShopProvider>
         <AuthProvider>
           <CartProvider>
@@ -34,6 +34,6 @@ export default function App() {
           </CartProvider>
         </AuthProvider>
       </ShopProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
