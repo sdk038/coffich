@@ -5,6 +5,20 @@ import './About.css';
 export default function About() {
   const { shop, loading, error } = useShop();
   const empty = !loading && !error && !shop;
+  const values = [
+    {
+      title: 'Кофе без снобизма',
+      text: 'Мы любим качественное зерно и понятную подачу. Напиток должен быть вкусным и удобным для повседневной жизни.',
+    },
+    {
+      title: 'Тёплый сервис',
+      text: 'Важно не только то, что в чашке, но и как вас встречают: быстро, спокойно и по-доброму.',
+    },
+    {
+      title: 'Место для паузы',
+      text: 'Coffich задуман как городская точка притяжения: для короткой остановки, работы с ноутбуком и живых разговоров.',
+    },
+  ];
 
   if (loading) {
     return (
@@ -26,8 +40,8 @@ export default function About() {
     return (
       <div className="page about">
         <p className="about__state">
-          Заполните модель Shop в админке Django или выполните{' '}
-          <code>python manage.py seed_demo</code>.
+          История кофейни скоро появится здесь вместе с рассказом о команде,
+          напитках и атмосфере пространства.
         </p>
       </div>
     );
@@ -49,12 +63,31 @@ export default function About() {
       </div>
 
       <div className="about__content">
+        <div className="about__intro">
+          <p className="about__eyebrow">О кофейне</p>
+          <h2 className="about__section-title">Место, куда хочется возвращаться</h2>
+          <p className="about__section-lead">
+            Мы строим Coffich вокруг простого ощущения: хороший кофе должен
+            сопровождать ваш день, а пространство вокруг него должно давать
+            ощущение комфорта, ритма и заботы.
+          </p>
+        </div>
+
         {shop.about && (
           <div
             className="about__richtext"
             dangerouslySetInnerHTML={{ __html: shop.about }}
           />
         )}
+
+        <div className="about__values">
+          {values.map((item) => (
+            <article key={item.title} className="about__value-card">
+              <h3 className="about__value-title">{item.title}</h3>
+              <p className="about__value-text">{item.text}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   );

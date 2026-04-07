@@ -30,8 +30,13 @@ export default function Login() {
     setInfo(null);
     setSendingCode(true);
     try {
-      await sendCode(phone.trim());
-      setInfo('Код отправлен. Проверьте SMS.');
+      const data = await sendCode(phone.trim());
+      if (data?.devCode) {
+        setCode(String(data.devCode));
+        setInfo(`Код отправлен (mock): ${data.devCode}`);
+      } else {
+        setInfo('Код отправлен. Проверьте SMS.');
+      }
     } catch (ex) {
       setErr(ex instanceof ApiHttpError ? ex.message : 'Не удалось отправить код');
     } finally {
@@ -59,7 +64,7 @@ export default function Login() {
       <div className="auth-page__inner">
         <h1 className="auth-page__title">Вход</h1>
         <p className="auth-page__lead">
-          Введите номер телефона и 4-значный код из SMS.
+          Введите номер телефона и подтвердите вход 4-значным кодом из SMS.
         </p>
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-form__field">

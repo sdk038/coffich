@@ -11,7 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 try:
     from dotenv import load_dotenv
 
-    load_dotenv(BASE_DIR / ".env")
+    # В dev при перезапусках shell может держать старые/пустые env.
+    # override=True гарантирует приоритет значений из django_backend/.env.
+    load_dotenv(BASE_DIR / ".env", override=True)
 except Exception:
     # optional dependency; environment can be provided by shell/container
     pass
@@ -142,6 +144,19 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # SMS.to — см. accounts/sms.py и .env.example
-SMSTO_API_KEY = os.environ.get("SMSTO_API_KEY", "")
+SMS_PROVIDER = os.environ.get("SMS_PROVIDER", "auto").strip().lower()
+SMSTO_API_KEY = os.environ.get("SMSTO_API_KEY", "").strip()
+SMSTO_API_TOKEN = os.environ.get("SMSTO_API_TOKEN", "").strip()
 SMSTO_SENDER_ID = os.environ.get("SMSTO_SENDER_ID", "SMSto")
 SMSTO_BASE_URL = os.environ.get("SMSTO_BASE_URL", "https://api.sms.to")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "").strip()
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "").strip()
+TWILIO_FROM_NUMBER = os.environ.get("TWILIO_FROM_NUMBER", "").strip()
+SMS_SSL_VERIFY = os.environ.get("SMS_SSL_VERIFY", "1").strip()
+SMS_USE_SYSTEM_PROXY = os.environ.get("SMS_USE_SYSTEM_PROXY", "0").strip()
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+TELEGRAM_SSL_VERIFY = os.environ.get("TELEGRAM_SSL_VERIFY", SMS_SSL_VERIFY).strip()
+TELEGRAM_USE_SYSTEM_PROXY = os.environ.get(
+    "TELEGRAM_USE_SYSTEM_PROXY", "0"
+).strip()

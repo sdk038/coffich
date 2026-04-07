@@ -12,18 +12,23 @@ export default function Register() {
   const [phone, setPhone] = useState('');
   const [err, setErr] = useState(null);
   const [done, setDone] = useState(false);
+  const [devCode, setDevCode] = useState('');
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setErr(null);
+    setDevCode('');
     setPending(true);
     try {
-      await register({
+      const data = await register({
         phone: phone.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
       });
+      if (data?.devCode) {
+        setDevCode(String(data.devCode));
+      }
       setDone(true);
     } catch (ex) {
       setErr(ex instanceof ApiHttpError ? ex.message : 'Не удалось зарегистрироваться');
@@ -39,8 +44,11 @@ export default function Register() {
           <h1 className="auth-page__title">Код отправлен</h1>
           <p className="auth-page__lead">
             На номер <strong>{phone.trim()}</strong> отправлен 4-значный код входа.
-            Если SMS.to не настроен, сервер вернёт ошибку отправки (503).
+            Перейдите ко входу, введите код из уведомления и завершите авторизацию.
           </p>
+          {devCode && (
+            <p className="auth-page__info">Код для входа (mock): <strong>{devCode}</strong></p>
+          )}
           <Link
             className="btn btn--primary auth-page__cta"
             to={`/login?phone=${encodeURIComponent(phone.trim())}`}
@@ -57,7 +65,7 @@ export default function Register() {
       <div className="auth-page__inner">
         <h1 className="auth-page__title">Регистрация</h1>
         <p className="auth-page__lead">
-          Укажите имя, фамилию и номер телефона. Мы отправим 4-значный код по SMS.
+          Укажите имя, фамилию и номер телефона. Мы отправим 4-значный код для входа.
         </p>
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-form__field">

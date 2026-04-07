@@ -63,6 +63,31 @@
   padding: var(--space-xl) var(--space-md);
 }
 
+.about__intro {
+  margin-bottom: var(--space-xl);
+}
+
+.about__eyebrow {
+  margin: 0 0 var(--space-sm);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-accent-soft);
+  font-weight: 700;
+}
+
+.about__section-title {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  margin-bottom: var(--space-sm);
+}
+
+.about__section-lead {
+  margin: 0;
+  color: var(--color-ink-muted);
+  line-height: 1.7;
+  font-size: 1.03rem;
+}
+
 .about__richtext {
   font-size: 1.05rem;
   line-height: 1.75;
@@ -75,4 +100,47 @@
 
 .about__richtext a {
   color: var(--color-accent);
+}
+
+.about__values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.about__value-card {
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 14px 32px rgba(42, 31, 23, 0.08);
+}
+
+.about__value-title {
+  font-size: 1.1rem;
+  margin-bottom: var(--space-xs);
+}
+
+.about__value-text {
+  margin: 0;
+  color: var(--color-ink-muted);
+  line-height: 1.65;
+}
+
+@media (max-width: 800px) {
+  .about__values {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .about__cover {
+    min-height: 260px;
+    padding: 1.6rem 1rem;
+  }
+
+  .about__content {
+    padding: 2rem 1rem;
+  }
 }

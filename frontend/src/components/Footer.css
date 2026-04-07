@@ -57,9 +57,31 @@
   color: var(--color-accent);
 }
 
+.footer__meta {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--color-ink-muted);
+  font-size: 0.92rem;
+}
+
+.footer__meta p {
+  margin: 0;
+  white-space: pre-line;
+}
+
 .footer__copy {
   margin: 0;
   font-size: 0.85rem;
   color: var(--color-ink-muted);
   opacity: 0.85;
+}
+
+@media (max-width: 639px) {
+  .footer {
+    padding: 1.5rem 1rem;
+  }
+
+  .footer__links {
+    gap: 0.85rem;
+  }
 }

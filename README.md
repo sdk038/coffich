@@ -14,9 +14,11 @@ One-click Blueprint deploy:
 - https://render.com/deploy?repo=https://github.com/sdk038/coffich
 
 After creating services, set real SMS.to values in backend environment:
-- `SMSTO_API_KEY`
+- `SMSTO_API_KEY` (or `SMSTO_API_TOKEN`)
 - `SMSTO_SENDER_ID` (e.g. `SMSto`)
 - `SMSTO_BASE_URL` (default `https://api.sms.to`)
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 - `DJANGO_CSRF_TRUSTED_ORIGINS` (your frontend URL, e.g. `https://coffich-frontend.onrender.com`)
 
 Frontend service env:

@@ -43,6 +43,23 @@ class LoginCodeSerializer(serializers.Serializer):
         return code
 
 
+class OrderItemSerializer(serializers.Serializer):
+    key = serializers.CharField(max_length=64)
+    title = serializers.CharField(max_length=255)
+    price = serializers.IntegerField(min_value=0)
+    quantity = serializers.IntegerField(min_value=1, max_value=99)
+
+
+class CheckoutOrderSerializer(serializers.Serializer):
+    items = OrderItemSerializer(many=True)
+    note = serializers.CharField(max_length=500, required=False, allow_blank=True)
+
+    def validate_items(self, value):
+        if not value:
+            raise serializers.ValidationError("Корзина пуста.")
+        return value
+
+
 class UserMeSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source="username", read_only=True)
 

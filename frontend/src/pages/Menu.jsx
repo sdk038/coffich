@@ -37,9 +37,15 @@ export default function Menu() {
   const byCategory = useMemo(() => {
     const map = new Map();
     for (const p of products) {
-      const key = p.category?.name || 'Другое';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(p);
+      const key = p.category?.slug || p.category?.name || 'other';
+      if (!map.has(key)) {
+        map.set(key, {
+          title: p.category?.name || 'Другое',
+          description: p.category?.description || '',
+          items: [],
+        });
+      }
+      map.get(key).items.push(p);
     }
     return map;
   }, [products]);
@@ -79,20 +85,36 @@ export default function Menu() {
         <div className="menu-page__hero-inner">
           <h1 className="menu-page__title">Меню</h1>
           <p className="menu-page__lead">
-            Все позиции из API Django — цены и описания меняются в админке.
+            Собрали напитки и десерты для разных сценариев: быстрый кофе перед
+            делами, спокойная пауза в середине дня и что-то особенное к вечерней
+            встрече.
           </p>
         </div>
       </header>
 
       <div className="menu-page__body">
+        <div className="menu-page__intro">
+          <p>
+            В основе меню — классические кофейные позиции, фирменные напитки,
+            холодные рецепты и свежая выпечка. Всё готовим так, чтобы вы могли
+            выбрать и любимый ежедневный напиток, и что-то новое под настроение.
+          </p>
+        </div>
         {products.length === 0 ? (
-          <p className="menu-page__empty">Пока нет товаров в базе.</p>
+          <p className="menu-page__empty">
+            Меню обновляется. Скоро здесь появятся напитки, десерты и сезонные позиции.
+          </p>
         ) : (
-          [...byCategory.entries()].map(([catName, items]) => (
-            <section key={catName} className="menu-section">
-              <h2 className="menu-section__title">{catName}</h2>
+          [...byCategory.entries()].map(([catKey, section]) => (
+            <section key={catKey} className="menu-section">
+              <div className="menu-section__head">
+                <h2 className="menu-section__title">{section.title}</h2>
+                {section.description && (
+                  <p className="menu-section__desc">{section.description}</p>
+                )}
+              </div>
               <ul className="menu-section__list">
-                {items.map((item) => (
+                {section.items.map((item) => (
                   <li
                     key={item.documentId || item.id}
                     className="menu-row"

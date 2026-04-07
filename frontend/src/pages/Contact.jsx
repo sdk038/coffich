@@ -25,8 +25,8 @@ export default function Contact() {
     return (
       <div className="page contact-page">
         <p className="contact-page__state">
-          Нет данных Shop. Запустите API и создайте запись в админке Django или
-          выполните seed_demo.
+          Контакты скоро появятся здесь. Мы добавим адрес, часы работы и быстрые
+          способы связи.
         </p>
       </div>
     );
@@ -37,8 +37,22 @@ export default function Contact() {
       <div className="contact-page__inner">
         <h1 className="contact-page__title">Контакты</h1>
         <p className="contact-page__lead">
-          Данные из API (модель Shop в админке Django).
+          Если хотите забронировать столик, уточнить наличие десертов или
+          оформить самовывоз, свяжитесь с нами удобным способом.
         </p>
+
+        <div className="contact-page__actions">
+          {shop.phone && (
+            <a className="contact-page__action" href={`tel:${shop.phone.replace(/\s/g, '')}`}>
+              Позвонить
+            </a>
+          )}
+          {shop.email && (
+            <a className="contact-page__action contact-page__action--ghost" href={`mailto:${shop.email}`}>
+              Написать на email
+            </a>
+          )}
+        </div>
 
         <div className="contact-grid">
           <section className="contact-card">
@@ -81,6 +95,15 @@ export default function Contact() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+          </div>
+        )}
+
+        {!shop.mapEmbedUrl && (
+          <div className="contact-page__note">
+            <p>
+              Планируйте визит заранее: мы подскажем удобное время для встречи,
+              поможем с предзаказом напитков и расскажем о сезонных позициях.
+            </p>
           </div>
         )}
       </div>

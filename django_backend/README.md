@@ -82,11 +82,18 @@ lsof -ti:8000 | xargs kill
 | POST | `/api/auth/send-code/` | Тело: `phone` — отправка нового 4-значного кода для входа |
 | POST | `/api/auth/refresh/` | Обновление access-токена |
 | GET | `/api/auth/me/` | Заголовок `Authorization: Bearer <access>` — профиль |
+| POST | `/api/orders/checkout/` | Заголовок `Authorization: Bearer <access>`, тело: `items`, `note` — отправляет заказ в Telegram-бот |
 
 JSON в **camelCase** (совместимо с текущим React).
 
-**SMS:** задайте в `.env` переменные `SMSTO_API_KEY`, `SMSTO_SENDER_ID`, `SMSTO_BASE_URL`.  
+**SMS:** задайте в `.env` переменные `SMSTO_API_KEY` (или `SMSTO_API_TOKEN`), `SMSTO_SENDER_ID`, `SMSTO_BASE_URL`.  
+Если случайно вставили ключ как `Bearer xxx`, backend автоматически уберёт `Bearer ` из значения.
 Если SMS.to не настроен или отклоняет отправку, API вернёт `503` с точной причиной (`sms`) и код не будет считаться отправленным.
+
+**Telegram заказы:** для кнопки оформления в корзине задайте:
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- при необходимости `TELEGRAM_SSL_VERIFY=0` и `TELEGRAM_USE_SYSTEM_PROXY=0` для локальной отладки
 
 ### Чтобы код приходил всем пользователям (production)
 

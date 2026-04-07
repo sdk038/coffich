@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import generics, permissions, status
@@ -10,12 +11,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import SmsCode
 from .serializers import (
+    CheckoutOrderSerializer,
     LoginCodeSerializer,
     RegisterSerializer,
     SendCodeSerializer,
     UserMeSerializer,
 )
 from .sms import SmsDeliveryError, send_login_code_sms
+from .telegram import TelegramDeliveryError, send_order_to_telegram
+
+
+def _is_mock_provider() -> bool:
+    return getattr(settings, "SMS_PROVIDER", "auto").strip().lower() == "mock"
 
 
 def issue_sms_code(user: User, phone: str, purpose: str = SmsCode.PURPOSE_AUTH) -> SmsCode:
@@ -74,19 +81,19 @@ class RegisterView(generics.CreateAPIView):
                 user.save(update_fields=["first_name", "last_name"])
 
         try:
-            issue_sms_code(user, phone)
+            sms_row = issue_sms_code(user, phone)
         except SmsDeliveryError as e:
             return Response(
                 {"sms": str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return Response(
-            {
-                "message": "Код отправлен на телефон. Введите 4 цифры для входа.",
-                "existingUser": not created,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        payload = {
+            "message": "Код отправлен на телефон. Введите 4 цифры для входа.",
+            "existingUser": not created,
+        }
+        if _is_mock_provider():
+            payload["devCode"] = sms_row.code
+        return Response(payload, status=status.HTTP_201_CREATED)
 
 
 class SendCodeView(APIView):
@@ -105,16 +112,16 @@ class SendCodeView(APIView):
             )
 
         try:
-            issue_sms_code(user, phone)
+            sms_row = issue_sms_code(user, phone)
         except SmsDeliveryError as e:
             return Response(
                 {"sms": str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return Response(
-            {"message": "Код отправлен. Проверьте SMS."},
-            status=status.HTTP_200_OK,
-        )
+        payload = {"message": "Код отправлен. Проверьте SMS."}
+        if _is_mock_provider():
+            payload["devCode"] = sms_row.code
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class LoginCodeView(APIView):
@@ -144,7 +151,13 @@ class LoginCodeView(APIView):
             .first()
         )
 
-        if not sms or sms.is_expired:
+        if not sms:
+            return Response(
+                {"code": "Сначала запросите код кнопкой «Отправить код»."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if sms.is_expired:
             return Response(
                 {"code": "Код истёк. Запросите новый код."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -175,3 +188,40 @@ class MeView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class CheckoutOrderView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = CheckoutOrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        items = serializer.validated_data["items"]
+        note = serializer.validated_data.get("note", "").strip()
+        total_sum = sum(int(item["price"]) * int(item["quantity"]) for item in items)
+
+        user = request.user
+        customer_name = " ".join(
+            part for part in [user.first_name.strip(), user.last_name.strip()] if part
+        ).strip() or "Без имени"
+        phone = user.username or "Не указан"
+
+        try:
+            send_order_to_telegram(
+                customer_name=customer_name,
+                phone=phone,
+                items=items,
+                total_sum=total_sum,
+                note=note,
+            )
+        except TelegramDeliveryError as exc:
+            return Response(
+                {"telegram": str(exc)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response(
+            {"message": "Заказ отправлен в кофейню. Мы скоро свяжемся с вами."},
+            status=status.HTTP_200_OK,
+        )

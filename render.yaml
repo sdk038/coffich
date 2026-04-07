@@ -19,10 +19,18 @@ services:
         generateValue: true
       - key: SMSTO_API_KEY
         sync: false
+      - key: SMSTO_API_TOKEN
+        sync: false
       - key: SMSTO_SENDER_ID
         value: SMSto
       - key: SMSTO_BASE_URL
         value: https://api.sms.to
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: TELEGRAM_USE_SYSTEM_PROXY
+        value: "0"
 
   - type: static_site
     name: coffich-frontend

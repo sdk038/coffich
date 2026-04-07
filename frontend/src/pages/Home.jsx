@@ -62,6 +62,7 @@ export default function Home() {
 
   const primary = slides[0];
   const secondary = slides[1];
+  const featuredSelection = featured.slice(0, 4);
 
   const handleOrderProduct = (product) => {
     if (!user) {
@@ -79,7 +80,28 @@ export default function Home() {
   const lead =
     primary?.subtitle ||
     shop?.tagline ||
-    'Добавьте первый слайд в Strapi (Hero Slide) или заполните данные кофейни.';
+    'Готовим кофе, к которому хочется возвращаться каждый день: от первого эспрессо утром до десерта к вечерней встрече.';
+
+  const serviceHighlights = [
+    {
+      title: 'Зерно с характером',
+      text: 'Собираем меню вокруг понятного вкуса: чистый эспрессо, мягкие молочные напитки и яркие сезонные рецепты.',
+    },
+    {
+      title: 'Комфорт на каждый день',
+      text: 'Можно задержаться за ноутбуком, забежать за кофе с собой или оформить быстрый заказ без очереди.',
+    },
+    {
+      title: 'Десерты к напитку',
+      text: 'Подбираем выпечку и сладости так, чтобы каждая пара работала вместе: от рафа с чизкейком до американо с банановым хлебом.',
+    },
+  ];
+
+  const visitDetails = [
+    { label: 'Адрес', value: shop?.address || 'Тёплая локация в центре города' },
+    { label: 'Время', value: shop?.hours || 'Ежедневно с раннего утра до позднего вечера' },
+    { label: 'Связь', value: shop?.phone || shop?.email || 'Напишите нам для предзаказа и вопросов' },
+  ];
 
   return (
     <div className="page home">
@@ -136,15 +158,21 @@ export default function Home() {
 
       <section className="section home__intro">
         <div className="section__inner">
-          {shop && (
-            <>
-              <p className="home__eyebrow">Добро пожаловать</p>
-              <h2 className="section__title">{shop.shopName || 'Coffich'}</h2>
-              {shop.tagline && (
-                <p className="section__lead">{shop.tagline}</p>
-              )}
-            </>
-          )}
+          <p className="home__eyebrow">Добро пожаловать</p>
+          <h2 className="section__title">{shop?.shopName || 'Coffich'}</h2>
+          <p className="section__lead">
+            {shop?.tagline ||
+              'Пространство для коротких пауз, длинных разговоров и любимых кофейных ритуалов.'}
+          </p>
+
+          <div className="home__highlight-grid">
+            {serviceHighlights.map((item) => (
+              <article key={item.title} className="home__highlight-card">
+                <h3 className="home__highlight-title">{item.title}</h3>
+                <p className="home__highlight-text">{item.text}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -157,7 +185,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="card-grid">
-            {featured.map((item) => (
+            {featuredSelection.map((item) => (
               <article
                 key={item.documentId || item.id}
                 className="product-card"
@@ -195,9 +223,44 @@ export default function Home() {
               </article>
             ))}
           </div>
-          {featured.length === 0 && (
-            <p className="home__empty">Отметьте товары как «featured» в админке Django.</p>
+          {featuredSelection.length === 0 && (
+            <p className="home__empty">
+              Скоро здесь появятся фирменные напитки, десерты и сезонные позиции.
+            </p>
           )}
+        </div>
+      </section>
+
+      <section className="section home__visit">
+        <div className="section__inner">
+          <div className="home__visit-card">
+            <div className="home__visit-copy">
+              <p className="home__eyebrow">Планируйте визит</p>
+              <h2 className="section__title">Забегайте за кофе утром, встречайтесь у нас днём</h2>
+              <p className="section__lead home__visit-lead">
+                Мы задумали Coffich как место, которое одинаково хорошо подходит
+                для утреннего кофе с собой, спокойного рабочего часа и вечерней
+                встречи с друзьями.
+              </p>
+              <div className="hero-banner__actions">
+                <Link className="btn btn--primary" to="/contact">
+                  Контакты
+                </Link>
+                <Link className="btn btn--ghost" to="/about">
+                  О пространстве
+                </Link>
+              </div>
+            </div>
+
+            <div className="home__visit-details">
+              {visitDetails.map((item) => (
+                <div key={item.label} className="home__visit-detail">
+                  <span className="home__visit-label">{item.label}</span>
+                  <p className="home__visit-value">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

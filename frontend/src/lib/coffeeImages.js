@@ -1,6 +1,6 @@
 /**
- * Красивые фото кофе и кофеен (Unsplash) — показываются, если в Strapi нет своего медиа.
- * При загрузке своих картинок в CMS они имеют приоритет.
+ * Красивые фото кофе и кофеен (Unsplash) — показываются, если в Django API нет своего медиа.
+ * При загрузке своих картинок в админке они имеют приоритет.
  */
 import { mediaUrl } from './api';
 
@@ -63,7 +63,7 @@ function pickDrinkByKeywords(slug, title) {
 }
 
 /**
- * URL картинки товара: сначала Strapi, иначе подборка Unsplash.
+ * URL картинки товара: сначала Django API, иначе подборка Unsplash.
  */
 export function resolveProductImageUrl(product) {
   const fromCms = mediaUrl(product?.image);
@@ -75,7 +75,7 @@ export function resolveProductImageUrl(product) {
 }
 
 /**
- * Фон hero-слайда: Strapi или Unsplash по индексу слайда.
+ * Фон hero-слайда: Django API или Unsplash по индексу слайда.
  */
 export function resolveHeroImageUrl(slide, index) {
   const fromCms = mediaUrl(slide?.image);

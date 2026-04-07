@@ -206,6 +206,33 @@
   text-align: center;
 }
 
+.home__highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.home__highlight-card {
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 238, 229, 0.96));
+  border: 1px solid var(--color-border);
+  box-shadow: 0 12px 30px rgba(42, 31, 23, 0.07);
+  text-align: left;
+}
+
+.home__highlight-title {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-xs);
+}
+
+.home__highlight-text {
+  margin: 0;
+  color: var(--color-ink-muted);
+  line-height: 1.7;
+}
+
 .home__eyebrow {
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -322,4 +349,105 @@
   text-align: center;
   color: var(--color-ink-muted);
   padding: var(--space-lg);
+}
+
+.home__visit {
+  padding-top: 0;
+}
+
+.home__visit-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.95fr);
+  gap: var(--space-lg);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: calc(var(--radius-lg) + 4px);
+  background: linear-gradient(135deg, #2d2118 0%, #503626 100%);
+  color: #fff8f0;
+  box-shadow: 0 22px 56px rgba(42, 31, 23, 0.16);
+}
+
+.home__visit-card .section__title,
+.home__visit-card .home__eyebrow,
+.home__visit-card .section__lead {
+  color: inherit;
+}
+
+.home__visit-lead {
+  max-width: 42ch;
+  opacity: 0.88;
+}
+
+.home__visit-details {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.home__visit-detail {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.home__visit-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: rgba(255, 234, 216, 0.82);
+}
+
+.home__visit-value {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 960px) {
+  .home__highlight-grid,
+  .home__visit-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-banner {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .hero-banner__lead,
+  .hero-banner__accent,
+  .section__lead {
+    max-width: none;
+  }
+
+  .hero-banner__actions,
+  .home__visit-card .hero-banner__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-banner__actions .btn {
+    width: 100%;
+  }
+
+  .section {
+    padding: 2.4rem 1rem;
+  }
+
+  .section__head {
+    align-items: flex-start;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .product-card__body {
+    padding: 1rem;
+  }
 }

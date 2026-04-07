@@ -4,8 +4,7 @@ import './Footer.css';
 
 export default function Footer() {
   const { shop } = useShop();
-  const tag =
-    shop?.tagline || 'Свежая обжарка и домашняя выпечка.';
+  const tag = shop?.tagline || 'Кофе, десерты и тёплая пауза в ритме города.';
 
   return (
     <footer className="footer">
@@ -20,6 +19,10 @@ export default function Footer() {
           <Link to="/menu">Меню</Link>
           <Link to="/about">О нас</Link>
           <Link to="/contact">Контакты</Link>
+        </div>
+        <div className="footer__meta">
+          {shop?.address && <p>{shop.address}</p>}
+          {shop?.hours && <p>{shop.hours}</p>}
         </div>
         <p className="footer__copy">© {new Date().getFullYear()} Coffich</p>
       </div>
