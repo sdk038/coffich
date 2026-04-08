@@ -5,6 +5,7 @@ from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from .models import CustomerProfile, SmsCode, TelegramBinding, TelegramLoginRequest
+from .telegram import TelegramDeliveryError
 
 
 @override_settings(
@@ -139,12 +140,9 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(me_response.data["latitude"], self.bukhara_lat)
         self.assertEqual(me_response.data["longitude"], self.bukhara_lng)
 
-    @patch(
-        "accounts.views.build_telegram_start_url",
-        return_value="https://t.me/coffich_test_bot?start=fresh-start",
-    )
-    def test_send_code_requires_fresh_start_even_with_existing_binding(
-        self, _mock_start_url
+    @patch("accounts.views.send_auth_code_to_telegram")
+    def test_send_code_uses_existing_binding_and_sends_code_immediately(
+        self, mock_send_code
     ):
         user = User.objects.create_user(
             username="+998901234569",
@@ -172,12 +170,9 @@ class TelegramAuthFlowTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data["existingUser"])
-        self.assertFalse(response.data["telegramLinked"])
-        self.assertFalse(response.data["codeSent"])
-        self.assertEqual(
-            response.data["telegramBotUrl"],
-            "https://t.me/coffich_test_bot?start=fresh-start",
-        )
+        self.assertTrue(response.data["telegramLinked"])
+        self.assertTrue(response.data["codeSent"])
+        self.assertNotIn("telegramBotUrl", response.data)
 
         user.refresh_from_db()
         self.assertEqual(user.first_name, "Updated")
@@ -185,8 +180,12 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(user.customer_profile.latitude, self.bukhara_lat)
         self.assertEqual(user.customer_profile.longitude, self.bukhara_lng)
         self.assertEqual(user.telegram_binding.chat_id, "445566")
+        mock_send_code.assert_called_once_with("445566", SmsCode.objects.get(user=user).code)
 
-    @patch("accounts.views.send_auth_code_to_telegram")
+    @patch(
+        "accounts.views.build_telegram_start_url",
+        return_value="https://t.me/coffich_test_bot?start=fresh-start",
+    )
     @patch(
         "accounts.views.find_start_update",
         return_value={
@@ -196,8 +195,12 @@ class TelegramAuthFlowTests(TestCase):
             "last_name": "User",
         },
     )
-    def test_status_replaces_old_binding_with_current_start(
-        self, _mock_find_start, mock_send_code
+    @patch(
+        "accounts.views.send_auth_code_to_telegram",
+        side_effect=[TelegramDeliveryError("chat unavailable"), None],
+    )
+    def test_status_rebinds_after_existing_binding_send_fails(
+        self, mock_send_code, _mock_find_start, _mock_start_url
     ):
         user = User.objects.create_user(
             username="+998901234573",
@@ -231,6 +234,10 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(send_response.status_code, 200)
         self.assertFalse(send_response.data["telegramLinked"])
         self.assertFalse(send_response.data["codeSent"])
+        self.assertEqual(
+            send_response.data["telegramBotUrl"],
+            "https://t.me/coffich_test_bot?start=fresh-start",
+        )
 
         status_response = self.client.get(
             "/api/auth/telegram-status/",
@@ -242,7 +249,7 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(status_response.status_code, 200)
         self.assertTrue(status_response.data["telegramLinked"])
         self.assertTrue(status_response.data["codeSent"])
-        mock_send_code.assert_called_once()
+        self.assertEqual(mock_send_code.call_count, 2)
 
         user.refresh_from_db()
         self.assertEqual(user.telegram_binding.chat_id, "999888777")

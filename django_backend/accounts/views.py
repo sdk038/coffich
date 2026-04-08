@@ -177,10 +177,13 @@ def create_telegram_login_request(user: User, phone: str) -> TelegramLoginReques
         expires_at__gt=now,
     ).update(expires_at=now)
 
+    existing_binding = get_user_telegram_binding(user)
     return TelegramLoginRequest.objects.create(
         user=user,
         phone=phone,
         start_token=f"auth_{secrets.token_urlsafe(18)}",
+        telegram_binding=existing_binding,
+        linked_at=now if existing_binding else None,
         expires_at=now + timedelta(minutes=10),
     )
 
@@ -262,6 +265,15 @@ def start_telegram_login(user: User, phone: str, *, created: bool) -> dict:
         )
 
     login_request = create_telegram_login_request(user, phone)
+    if login_request.telegram_binding_id:
+        try:
+            login_request = sync_telegram_login_request(login_request)
+        except TelegramDeliveryError:
+            # If the stored chat can no longer receive messages, fall back to
+            # a fresh Start flow for this login attempt instead of hard-failing.
+            login_request.telegram_binding = None
+            login_request.linked_at = None
+            login_request.save(update_fields=["telegram_binding", "linked_at"])
     try:
         return build_telegram_login_payload(login_request, created=created)
     except TelegramDeliveryError:

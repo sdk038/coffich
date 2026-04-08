@@ -4,11 +4,20 @@ import { useAuth } from '../context/AuthContext';
 import { ApiHttpError } from '../lib/api';
 import './AuthPages.css';
 
+const PHONE_PREFIX = '+998';
+const UZBEK_PHONE_DIGITS = 12;
+
 function useInitialPhone(location) {
   return useMemo(() => {
     const search = new URLSearchParams(location.search);
     return search.get('phone') || '';
   }, [location.search]);
+}
+
+function normalizePhoneInput(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  const suffixDigits = digits.startsWith('998') ? digits.slice(3) : digits;
+  return `${PHONE_PREFIX}${suffixDigits}`;
 }
 
 export default function Login() {
@@ -20,11 +29,13 @@ export default function Login() {
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState(initialPhone);
+  const [phone, setPhone] = useState(() => normalizePhoneInput(initialPhone || PHONE_PREFIX));
   const [err, setErr] = useState(null);
   const [sendingCode, setSendingCode] = useState(false);
   const [locationLabel, setLocationLabel] = useState('Локация не определена');
   const [locationReady, setLocationReady] = useState(false);
+  const hasPhoneDigits = phone.length > PHONE_PREFIX.length;
+  const isPhoneComplete = phone.replace(/\D/g, '').length === UZBEK_PHONE_DIGITS;
 
   function requestLocation() {
     return new Promise((resolve, reject) => {
@@ -66,6 +77,26 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setErr(null);
+    if (!firstName.trim() && !lastName.trim() && !hasPhoneDigits) {
+      setErr('Пожалуйста, заполните все поля.');
+      return;
+    }
+    if (!firstName.trim()) {
+      setErr('Пожалуйста, введите имя.');
+      return;
+    }
+    if (!lastName.trim()) {
+      setErr('Пожалуйста, введите фамилию.');
+      return;
+    }
+    if (!hasPhoneDigits) {
+      setErr('Пожалуйста, введите номер телефона.');
+      return;
+    }
+    if (!isPhoneComplete) {
+      setErr('Введите номер телефона полностью после +998.');
+      return;
+    }
     setSendingCode(true);
     try {
       setLocationLabel('Запрашиваем локацию…');
@@ -106,7 +137,8 @@ export default function Login() {
           Укажите имя, фамилию и номер телефона. Затем мы попросим геолокацию,
           чтобы убедиться, что доставка доступна в Бухаре, и переведём вас во вход через Telegram.
         </p>
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          {err && <p className="auth-form__error">{err}</p>}
           <label className="auth-form__field">
             <span className="auth-form__label">Имя</span>
             <input
@@ -114,8 +146,10 @@ export default function Login() {
               className="auth-form__input"
               autoComplete="given-name"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                if (err) setErr(null);
+              }}
               placeholder='Введите свое имя'
             />
           </label>
@@ -126,8 +160,10 @@ export default function Login() {
               className="auth-form__input"
               autoComplete="family-name"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
+              onChange={(e) => {
+                setLastName(e.target.value);
+                if (err) setErr(null);
+              }}
               placeholder='Введите свою фамилию'
             />
           </label>
@@ -137,10 +173,13 @@ export default function Login() {
               type="tel"
               className="auth-form__input"
               autoComplete="tel"
-              placeholder="+998 ... .. .."
+              inputMode="numeric"
+              placeholder="90 123 45 67"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
+              onChange={(e) => {
+                setPhone(normalizePhoneInput(e.target.value));
+                if (err) setErr(null);
+              }}
             />
           </label>
           <div className={`auth-page__status${locationReady ? ' auth-page__status--ready' : ''}`}>
@@ -150,17 +189,10 @@ export default function Login() {
           <button
             type="submit"
             className="btn btn--ghost auth-page__secondary"
-            disabled={
-              sendingCode ||
-              !firstName.trim() ||
-              !lastName.trim() ||
-              !phone.trim()
-            }
+            disabled={sendingCode}
           >
             {sendingCode ? 'Переход в Telegram…' : 'Войти'}
           </button>
-
-          {err && <p className="auth-form__error">{err}</p>}
         </form>
       </div>
     </div>
