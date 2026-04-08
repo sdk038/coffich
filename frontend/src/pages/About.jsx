@@ -1,10 +1,12 @@
 import { useShop } from '../context/ShopContext';
 import { resolveAboutCoverUrl } from '../lib/coffeeImages';
+import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
 import './About.css';
 
 export default function About() {
   const { shop, loading, error } = useShop();
-  const empty = !loading && !error && !shop;
+  const displayShop = hasMeaningfulShopContent(shop) ? shop : DEMO_SHOP;
+  const empty = !loading && !error && !displayShop;
   const values = [
     {
       title: 'Кофе без снобизма',
@@ -36,7 +38,7 @@ export default function About() {
     );
   }
 
-  if (empty || !shop) {
+  if (empty || !displayShop) {
     return (
       <div className="page about">
         <p className="about__state">
@@ -47,7 +49,7 @@ export default function About() {
     );
   }
 
-  const cover = resolveAboutCoverUrl(shop);
+  const cover = resolveAboutCoverUrl(displayShop);
 
   return (
     <div className="page about">
@@ -57,8 +59,8 @@ export default function About() {
       >
         <div className="about__cover-overlay" />
         <div className="about__cover-inner">
-          <h1 className="about__title">{shop.shopName}</h1>
-          {shop.tagline && <p className="about__tagline">{shop.tagline}</p>}
+          <h1 className="about__title">{displayShop.shopName}</h1>
+          {displayShop.tagline && <p className="about__tagline">{displayShop.tagline}</p>}
         </div>
       </div>
 
@@ -73,10 +75,10 @@ export default function About() {
           </p>
         </div>
 
-        {shop.about && (
+        {displayShop.about && (
           <div
             className="about__richtext"
-            dangerouslySetInnerHTML={{ __html: shop.about }}
+            dangerouslySetInnerHTML={{ __html: displayShop.about }}
           />
         )}
 

@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import ProductModal from '../components/ProductModal';
 import OrderAuthModal from '../components/OrderAuthModal';
 import { resolveProductImageUrl, MENU_PAGE_HERO_IMAGE } from '../lib/coffeeImages';
+import { DEMO_PRODUCTS } from '../lib/demoContent';
 import { formatPriceUZS } from '../lib/formatPrice';
 import './Menu.css';
 
@@ -22,9 +23,15 @@ export default function Menu() {
     (async () => {
       try {
         const res = await fetchAPI('/api/products/');
-        if (!cancelled) setProducts(normalizeList(res));
+        if (!cancelled) {
+          const items = normalizeList(res);
+          setProducts(items.length ? items : DEMO_PRODUCTS);
+        }
       } catch (e) {
-        if (!cancelled) setErr(e.message);
+        if (!cancelled) {
+          setProducts(DEMO_PRODUCTS);
+          setErr(null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

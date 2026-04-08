@@ -1,9 +1,11 @@
 import { useShop } from '../context/ShopContext';
+import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
 import './Contact.css';
 
 export default function Contact() {
   const { shop, loading, error } = useShop();
-  const empty = !loading && !error && !shop;
+  const displayShop = hasMeaningfulShopContent(shop) ? shop : DEMO_SHOP;
+  const empty = !loading && !error && !displayShop;
 
   if (loading) {
     return (
@@ -42,13 +44,13 @@ export default function Contact() {
         </p>
 
         <div className="contact-page__actions">
-          {shop.phone && (
-            <a className="contact-page__action" href={`tel:${shop.phone.replace(/\s/g, '')}`}>
+          {displayShop.phone && (
+            <a className="contact-page__action" href={`tel:${displayShop.phone.replace(/\s/g, '')}`}>
               Позвонить
             </a>
           )}
-          {shop.email && (
-            <a className="contact-page__action contact-page__action--ghost" href={`mailto:${shop.email}`}>
+          {displayShop.email && (
+            <a className="contact-page__action contact-page__action--ghost" href={`mailto:${displayShop.email}`}>
               Написать на email
             </a>
           )}
@@ -57,13 +59,13 @@ export default function Contact() {
         <div className="contact-grid">
           <section className="contact-card">
             <h2 className="contact-card__label">Адрес</h2>
-            <p className="contact-card__value">{shop.address || '—'}</p>
+            <p className="contact-card__value">{displayShop.address || '—'}</p>
           </section>
           <section className="contact-card">
             <h2 className="contact-card__label">Телефон</h2>
-            {shop.phone ? (
-              <a className="contact-card__value" href={`tel:${shop.phone.replace(/\s/g, '')}`}>
-                {shop.phone}
+            {displayShop.phone ? (
+              <a className="contact-card__value" href={`tel:${displayShop.phone.replace(/\s/g, '')}`}>
+                {displayShop.phone}
               </a>
             ) : (
               <p className="contact-card__value">—</p>
@@ -71,9 +73,9 @@ export default function Contact() {
           </section>
           <section className="contact-card">
             <h2 className="contact-card__label">Email</h2>
-            {shop.email ? (
-              <a className="contact-card__value" href={`mailto:${shop.email}`}>
-                {shop.email}
+            {displayShop.email ? (
+              <a className="contact-card__value" href={`mailto:${displayShop.email}`}>
+                {displayShop.email}
               </a>
             ) : (
               <p className="contact-card__value">—</p>
@@ -82,23 +84,23 @@ export default function Contact() {
           <section className="contact-card contact-card--wide">
             <h2 className="contact-card__label">Часы работы</h2>
             <p className="contact-card__value contact-card__value--pre">
-              {shop.hours || '—'}
+              {displayShop.hours || '—'}
             </p>
           </section>
         </div>
 
-        {shop.mapEmbedUrl && (
+        {displayShop.mapEmbedUrl && (
           <div className="contact-map">
             <iframe
               title="Карта"
-              src={shop.mapEmbedUrl}
+              src={displayShop.mapEmbedUrl}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
         )}
 
-        {!shop.mapEmbedUrl && (
+        {!displayShop.mapEmbedUrl && (
           <div className="contact-page__note">
             <p>
               Планируйте визит заранее: мы подскажем удобное время для встречи,

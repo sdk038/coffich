@@ -7,6 +7,12 @@ import { useCart } from '../context/CartContext';
 import ProductModal from '../components/ProductModal';
 import OrderAuthModal from '../components/OrderAuthModal';
 import { resolveHeroImageUrl, resolveProductImageUrl } from '../lib/coffeeImages';
+import {
+  DEMO_HERO_SLIDES,
+  DEMO_PRODUCTS,
+  DEMO_SHOP,
+  hasMeaningfulShopContent,
+} from '../lib/demoContent';
 import { formatPriceUZS } from '../lib/formatPrice';
 import './Home.css';
 
@@ -30,11 +36,21 @@ export default function Home() {
           fetchAPI('/api/products/?featured=true'),
         ]);
         if (!cancelled) {
-          setSlides(normalizeList(sRes));
-          setFeatured(normalizeList(pRes));
+          const slideItems = normalizeList(sRes);
+          const featuredItems = normalizeList(pRes);
+          setSlides(slideItems.length ? slideItems : DEMO_HERO_SLIDES);
+          setFeatured(
+            featuredItems.length
+              ? featuredItems
+              : DEMO_PRODUCTS.filter((item) => item.featured)
+          );
         }
       } catch (e) {
-        if (!cancelled) setErr(e.message);
+        if (!cancelled) {
+          setSlides(DEMO_HERO_SLIDES);
+          setFeatured(DEMO_PRODUCTS.filter((item) => item.featured));
+          setErr(null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -75,11 +91,12 @@ export default function Home() {
   const heroImageUrl = primary
     ? resolveHeroImageUrl(primary, 0)
     : resolveHeroImageUrl({}, 0);
+  const displayShop = hasMeaningfulShopContent(shop) ? shop : DEMO_SHOP;
 
-  const title = primary?.title || shop?.shopName || 'Coffich';
+  const title = primary?.title || displayShop.shopName || 'Coffich';
   const lead =
     primary?.subtitle ||
-    shop?.tagline ||
+    displayShop.tagline ||
     'Готовим кофе, к которому хочется возвращаться каждый день: от первого эспрессо утром до десерта к вечерней встрече.';
 
   const serviceHighlights = [
@@ -98,9 +115,9 @@ export default function Home() {
   ];
 
   const visitDetails = [
-    { label: 'Адрес', value: shop?.address || 'Тёплая локация в центре города' },
-    { label: 'Время', value: shop?.hours || 'Ежедневно с раннего утра до позднего вечера' },
-    { label: 'Связь', value: shop?.phone || shop?.email || 'Напишите нам для предзаказа и вопросов' },
+    { label: 'Адрес', value: displayShop.address || 'Тёплая локация в центре города' },
+    { label: 'Время', value: displayShop.hours || 'Ежедневно с раннего утра до позднего вечера' },
+    { label: 'Связь', value: displayShop.phone || displayShop.email || 'Напишите нам для предзаказа и вопросов' },
   ];
 
   return (
@@ -159,9 +176,9 @@ export default function Home() {
       <section className="section home__intro">
         <div className="section__inner">
           <p className="home__eyebrow">Добро пожаловать</p>
-          <h2 className="section__title">{shop?.shopName || 'Coffich'}</h2>
+          <h2 className="section__title">{displayShop.shopName || 'Coffich'}</h2>
           <p className="section__lead">
-            {shop?.tagline ||
+            {displayShop.tagline ||
               'Пространство для коротких пауз, длинных разговоров и любимых кофейных ритуалов.'}
           </p>
 
