@@ -1,10 +1,17 @@
 from unittest.mock import patch
 
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
-from .models import CustomerProfile, SmsCode, TelegramBinding, TelegramLoginRequest
+from .models import (
+    CustomerOrder,
+    CustomerProfile,
+    SmsCode,
+    TelegramBinding,
+    TelegramLoginRequest,
+)
 from .telegram import TelegramDeliveryError
 
 
@@ -308,6 +315,64 @@ class TelegramAuthFlowTests(TestCase):
         kwargs = mock_send_order.call_args.kwargs
         self.assertEqual(kwargs["latitude"], self.bukhara_lat)
         self.assertEqual(kwargs["longitude"], self.bukhara_lng)
+        order = CustomerOrder.objects.get(user=user)
+        self.assertEqual(order.customer_name, "Geo Buyer")
+        self.assertEqual(order.phone, "+998901234571")
+        self.assertEqual(order.total_sum, 36000)
+        self.assertEqual(order.note, "Быстрая доставка")
+        self.assertIsNotNone(order.telegram_delivered_at)
+        self.assertEqual(order.telegram_error, "")
+        self.assertEqual(order.items.count(), 1)
+        item = order.items.get()
+        self.assertEqual(item.product_key, "espresso")
+        self.assertEqual(item.title, "Espresso")
+        self.assertEqual(item.price, 18000)
+        self.assertEqual(item.quantity, 2)
+        self.assertEqual(item.line_sum, 36000)
+
+    @patch(
+        "accounts.views.send_order_to_telegram",
+        side_effect=TelegramDeliveryError("bot unavailable"),
+    )
+    def test_checkout_keeps_order_in_db_when_telegram_fails(self, _mock_send_order):
+        user = User.objects.create_user(
+            username="+998901234574",
+            password="unused-password",
+            first_name="Saved",
+            last_name="Order",
+        )
+        CustomerProfile.objects.create(
+            user=user,
+            latitude=self.bukhara_lat,
+            longitude=self.bukhara_lng,
+        )
+        self.client.force_authenticate(user=user)
+
+        response = self.client.post(
+            "/api/orders/checkout/",
+            {
+                "items": [
+                    {
+                        "key": "raf",
+                        "title": "Raf",
+                        "price": 31000,
+                        "quantity": 1,
+                    }
+                ],
+                "note": "Связаться перед доставкой",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
+        self.assertEqual(response.data["warning"], "bot unavailable")
+        order = CustomerOrder.objects.get(user=user)
+        self.assertEqual(response.data["orderId"], order.id)
+        self.assertEqual(order.status, CustomerOrder.STATUS_NEW)
+        self.assertIsNone(order.telegram_delivered_at)
+        self.assertEqual(order.telegram_error, "bot unavailable")
+        self.assertEqual(order.items.count(), 1)
 
     @patch("accounts.views.send_order_to_telegram")
     def test_checkout_rejects_user_outside_bukhara(self, mock_send_order):
@@ -342,3 +407,12 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("location", response.data)
         mock_send_order.assert_not_called()
+        self.assertEqual(CustomerOrder.objects.count(), 0)
+
+    def test_admin_registers_customer_and_order_models(self):
+        self.assertIn(User, admin.site._registry)
+        self.assertIn(CustomerProfile, admin.site._registry)
+        self.assertIn(CustomerOrder, admin.site._registry)
+        self.assertIn(SmsCode, admin.site._registry)
+        self.assertIn(TelegramBinding, admin.site._registry)
+        self.assertIn(TelegramLoginRequest, admin.site._registry)

@@ -62,6 +62,59 @@ class CustomerProfile(models.Model):
         return f"{self.user.username} location"
 
 
+class CustomerOrder(models.Model):
+    STATUS_NEW = "new"
+    STATUS_IN_PROGRESS = "in_progress"
+    STATUS_DELIVERED = "delivered"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_CHOICES = (
+        (STATUS_NEW, "Новый"),
+        (STATUS_IN_PROGRESS, "В работе"),
+        (STATUS_DELIVERED, "Доставлен"),
+        (STATUS_CANCELLED, "Отменён"),
+    )
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="customer_orders"
+    )
+    status = models.CharField(
+        max_length=32, choices=STATUS_CHOICES, default=STATUS_NEW, db_index=True
+    )
+    customer_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=16, db_index=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    total_sum = models.IntegerField()
+    note = models.CharField(max_length=500, blank=True)
+    telegram_delivered_at = models.DateTimeField(blank=True, null=True)
+    telegram_error = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Order #{self.pk} for {self.phone}"
+
+
+class CustomerOrderItem(models.Model):
+    order = models.ForeignKey(
+        CustomerOrder, on_delete=models.CASCADE, related_name="items"
+    )
+    product_key = models.CharField(max_length=64)
+    title = models.CharField(max_length=255)
+    price = models.IntegerField()
+    quantity = models.PositiveIntegerField()
+    line_sum = models.IntegerField()
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.title} x{self.quantity}"
+
+
 class TelegramLoginRequest(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="telegram_login_requests"

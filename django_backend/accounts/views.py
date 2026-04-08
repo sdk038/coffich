@@ -4,13 +4,21 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import CustomerProfile, SmsCode, TelegramBinding, TelegramLoginRequest
+from .models import (
+    CustomerOrder,
+    CustomerOrderItem,
+    CustomerProfile,
+    SmsCode,
+    TelegramBinding,
+    TelegramLoginRequest,
+)
 from .serializers import (
     CheckoutOrderSerializer,
     LoginCodeSerializer,
@@ -258,6 +266,43 @@ def build_dev_fallback_payload(
     }
 
 
+def create_customer_order(
+    *,
+    user: User,
+    items: list[dict],
+    note: str,
+    total_sum: int,
+    customer_name: str,
+    phone: str,
+    latitude: float,
+    longitude: float,
+) -> CustomerOrder:
+    with transaction.atomic():
+        order = CustomerOrder.objects.create(
+            user=user,
+            customer_name=customer_name,
+            phone=phone,
+            latitude=latitude,
+            longitude=longitude,
+            total_sum=total_sum,
+            note=note,
+        )
+        CustomerOrderItem.objects.bulk_create(
+            [
+                CustomerOrderItem(
+                    order=order,
+                    product_key=item["key"],
+                    title=item["title"],
+                    price=int(item["price"]),
+                    quantity=int(item["quantity"]),
+                    line_sum=int(item["price"]) * int(item["quantity"]),
+                )
+                for item in items
+            ]
+        )
+    return order
+
+
 def start_telegram_login(user: User, phone: str, *, created: bool) -> dict:
     if not is_telegram_auth_configured():
         raise TelegramDeliveryError(
@@ -486,6 +531,16 @@ class CheckoutOrderView(APIView):
             part for part in [user.first_name.strip(), user.last_name.strip()] if part
         ).strip() or "Без имени"
         phone = user.username or "Не указан"
+        order = create_customer_order(
+            user=user,
+            items=items,
+            note=note,
+            total_sum=total_sum,
+            customer_name=customer_name,
+            phone=phone,
+            latitude=profile.latitude,
+            longitude=profile.longitude,
+        )
 
         try:
             send_order_to_telegram(
@@ -497,13 +552,28 @@ class CheckoutOrderView(APIView):
                 latitude=profile.latitude,
                 longitude=profile.longitude,
             )
+            order.telegram_delivered_at = timezone.now()
+            order.telegram_error = ""
+            order.save(update_fields=["telegram_delivered_at", "telegram_error"])
         except TelegramDeliveryError as exc:
+            order.telegram_error = str(exc)
+            order.save(update_fields=["telegram_error"])
             return Response(
-                {"telegram": str(exc)},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                {
+                    "message": (
+                        "Заказ сохранён. Telegram кофейни временно недоступен, "
+                        "но мы получили ваш заказ и обработаем его вручную."
+                    ),
+                    "warning": str(exc),
+                    "orderId": order.id,
+                },
+                status=status.HTTP_200_OK,
             )
 
         return Response(
-            {"message": "Заказ отправлен в кофейню. Мы скоро свяжемся с вами."},
+            {
+                "message": "Заказ отправлен в кофейню. Мы скоро свяжемся с вами.",
+                "orderId": order.id,
+            },
             status=status.HTTP_200_OK,
         )

@@ -281,8 +281,8 @@ class Command(BaseCommand):
                     "Именно поэтому Coffich выглядит одинаково уютно и офлайн, и на сайте.</p>"
                 ),
                 "address": "Ташкент, ул. Шота Руставели, 12",
-                "phone": "+998 90 123 45 67",
-                "email": "hello@coffich.local",
+                "phone": "+998 20 005 50 85",
+                "email": "sobrovv08@gmail.com",
                 "hours": "Пн–Пт: 08:00 – 22:00\nСб–Вс: 09:00 – 23:00",
                 "map_embed_url": "",
             },
