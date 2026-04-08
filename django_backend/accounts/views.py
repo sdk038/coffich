@@ -48,6 +48,31 @@ def issue_sms_code(user: User, phone: str, purpose: str = SmsCode.PURPOSE_AUTH) 
     return row
 
 
+def upsert_phone_user(phone: str, first_name: str, last_name: str):
+    user, created = User.objects.get_or_create(
+        username=phone,
+        defaults={
+            "first_name": first_name,
+            "last_name": last_name,
+        },
+    )
+    if created:
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+        return user, created
+
+    dirty = False
+    if first_name and user.first_name != first_name:
+        user.first_name = first_name
+        dirty = True
+    if last_name and user.last_name != last_name:
+        user.last_name = last_name
+        dirty = True
+    if dirty:
+        user.save(update_fields=["first_name", "last_name"])
+    return user, created
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -59,26 +84,7 @@ class RegisterView(generics.CreateAPIView):
         first_name = serializer.validated_data["first_name"].strip()
         last_name = serializer.validated_data["last_name"].strip()
 
-        user, created = User.objects.get_or_create(
-            username=phone,
-            defaults={
-                "first_name": first_name,
-                "last_name": last_name,
-            },
-        )
-        if created:
-            user.set_unusable_password()
-            user.save(update_fields=["password"])
-        else:
-            dirty = False
-            if first_name and user.first_name != first_name:
-                user.first_name = first_name
-                dirty = True
-            if last_name and user.last_name != last_name:
-                user.last_name = last_name
-                dirty = True
-            if dirty:
-                user.save(update_fields=["first_name", "last_name"])
+        user, created = upsert_phone_user(phone, first_name, last_name)
 
         try:
             sms_row = issue_sms_code(user, phone)
@@ -103,13 +109,9 @@ class SendCodeView(APIView):
         serializer = SendCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         phone = serializer.validated_data["phone"]
-
-        user = User.objects.filter(username=phone).first()
-        if not user:
-            return Response(
-                {"phone": "Номер не найден. Сначала зарегистрируйтесь."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        first_name = serializer.validated_data["first_name"].strip()
+        last_name = serializer.validated_data["last_name"].strip()
+        user, created = upsert_phone_user(phone, first_name, last_name)
 
         try:
             sms_row = issue_sms_code(user, phone)
@@ -118,7 +120,10 @@ class SendCodeView(APIView):
                 {"sms": str(e)},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        payload = {"message": "Код отправлен. Проверьте SMS."}
+        payload = {
+            "message": "Код отправлен. Проверьте SMS.",
+            "existingUser": not created,
+        }
         if _is_mock_provider():
             payload["devCode"] = sms_row.code
         return Response(payload, status=status.HTTP_200_OK)
@@ -136,7 +141,7 @@ class LoginCodeView(APIView):
         user = User.objects.filter(username=phone).first()
         if not user:
             return Response(
-                {"phone": "Номер не найден. Сначала зарегистрируйтесь."},
+                {"phone": "Сначала запросите код для этого номера."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -60,21 +60,16 @@ export function AuthProvider({ children }) {
     setUser(me);
   }, []);
 
-  const register = useCallback(async ({ phone, firstName, lastName }) => {
-    return fetchAPI('/api/auth/register/', {
-      method: 'POST',
-      skipAuth: true,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, firstName, lastName }),
-    });
-  }, []);
-
-  const sendCode = useCallback(async (phone) => {
+  const sendCode = useCallback(async ({ phone, firstName, lastName }) => {
     return fetchAPI('/api/auth/send-code/', {
       method: 'POST',
       skipAuth: true,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({
+        phone,
+        first_name: firstName,
+        last_name: lastName,
+      }),
     });
   }, []);
 
@@ -88,12 +83,11 @@ export function AuthProvider({ children }) {
       user,
       loading,
       login,
-      register,
       sendCode,
       logout,
       refreshUser: loadMe,
     }),
-    [user, loading, login, register, sendCode, logout, loadMe]
+    [user, loading, login, sendCode, logout, loadMe]
   );
 
   return (

@@ -50,7 +50,7 @@ export default function Header() {
   const accountTarget = user ? '/profile' : '/login';
   const authHint = user
     ? 'Управляйте профилем и быстрее возвращайтесь к заказу.'
-    : 'Вход по номеру телефона и 4-значному коду из SMS.';
+    : 'Вход по имени, фамилии, номеру телефона и коду из SMS.';
 
   return (
     <header className="header">

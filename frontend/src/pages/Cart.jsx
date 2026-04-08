@@ -74,9 +74,8 @@ export default function Cart() {
 
         {!authLoading && !user && (
           <p className="cart-page__auth">
-            <Link to="/login">Войдите</Link> или{' '}
-            <Link to="/register">зарегистрируйтесь</Link>, чтобы оформлять
-            заказы через Telegram.
+            <Link to="/login">Войдите по SMS</Link>, чтобы оформлять заказы через
+            Telegram.
           </p>
         )}
 

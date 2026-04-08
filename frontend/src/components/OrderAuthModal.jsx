@@ -24,23 +24,16 @@ export default function OrderAuthModal({ open, onClose }) {
         </button>
         <h2 className="order-auth-modal__title">Сначала войдите в аккаунт</h2>
         <p className="order-auth-modal__text">
-          Чтобы добавить позиции в корзину и оформить заказ, нужна регистрация по
-          номеру телефона. На указанный номер придёт 4-значный код для входа.
+          Чтобы добавить позиции в корзину и оформить заказ, введите имя,
+          фамилию и номер телефона. На указанный номер придёт 4-значный код для входа.
         </p>
         <div className="order-auth-modal__actions">
           <Link
             className="order-auth-modal__btn order-auth-modal__btn--primary"
-            to="/register"
-            onClick={onClose}
-          >
-            Регистрация
-          </Link>
-          <Link
-            className="order-auth-modal__btn order-auth-modal__btn--ghost"
             to="/login"
             onClick={onClose}
           >
-            Вход
+            Войти по SMS
           </Link>
         </div>
       </div>

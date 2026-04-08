@@ -24,11 +24,11 @@ export default function Profile() {
         <dl className="profile-page__dl">
           <div className="profile-page__row">
             <dt className="profile-page__dt">Имя</dt>
-            <dd className="profile-page__dd">{user.firstName || '—'}</dd>
+            <dd className="profile-page__dd">{user.first_name || '—'}</dd>
           </div>
           <div className="profile-page__row">
             <dt className="profile-page__dt">Фамилия</dt>
-            <dd className="profile-page__dd">{user.lastName || '—'}</dd>
+            <dd className="profile-page__dd">{user.last_name || '—'}</dd>
           </div>
           <div className="profile-page__row">
             <dt className="profile-page__dt">Телефон</dt>
