@@ -1,13 +1,17 @@
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .utils import normalize_phone
+from .utils import is_in_bukhara_delivery_zone, normalize_coordinate, normalize_phone
 
 
 class NamePhoneSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=32)
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
 
     def to_internal_value(self, data):
         payload = data.copy() if hasattr(data, "copy") else dict(data)
@@ -15,6 +19,10 @@ class NamePhoneSerializer(serializers.Serializer):
             payload["first_name"] = payload["firstName"]
         if "last_name" not in payload and "lastName" in payload:
             payload["last_name"] = payload["lastName"]
+        if "latitude" not in payload and "lat" in payload:
+            payload["latitude"] = payload["lat"]
+        if "longitude" not in payload and "lng" in payload:
+            payload["longitude"] = payload["lng"]
         return super().to_internal_value(payload)
 
     def validate_phone(self, value):
@@ -34,6 +42,24 @@ class NamePhoneSerializer(serializers.Serializer):
         if not value:
             raise serializers.ValidationError("Укажите фамилию")
         return value
+
+    def validate_latitude(self, value):
+        return normalize_coordinate(value, field_name="latitude")
+
+    def validate_longitude(self, value):
+        return normalize_coordinate(value, field_name="longitude")
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not is_in_bukhara_delivery_zone(
+            attrs["latitude"],
+            attrs["longitude"],
+            radius_km=getattr(settings, "BUKHARA_SERVICE_RADIUS_KM", 45.0),
+        ):
+            raise serializers.ValidationError(
+                {"location": "Доставка доступна только пользователям из Бухары."}
+            )
+        return attrs
 
 
 class RegisterSerializer(NamePhoneSerializer):
@@ -61,6 +87,16 @@ class LoginCodeSerializer(serializers.Serializer):
         return code
 
 
+class TelegramStatusSerializer(serializers.Serializer):
+    request_id = serializers.UUIDField()
+
+    def to_internal_value(self, data):
+        payload = data.copy() if hasattr(data, "copy") else dict(data)
+        if "request_id" not in payload and "requestId" in payload:
+            payload["request_id"] = payload["requestId"]
+        return super().to_internal_value(payload)
+
+
 class OrderItemSerializer(serializers.Serializer):
     key = serializers.CharField(max_length=64)
     title = serializers.CharField(max_length=255)
@@ -80,7 +116,21 @@ class CheckoutOrderSerializer(serializers.Serializer):
 
 class UserMeSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source="username", read_only=True)
+    latitude = serializers.SerializerMethodField()
+    longitude = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ("id", "phone", "first_name", "last_name")
+        fields = ("id", "phone", "first_name", "last_name", "latitude", "longitude")
+
+    def get_latitude(self, obj):
+        try:
+            return obj.customer_profile.latitude
+        except ObjectDoesNotExist:
+            return None
+
+    def get_longitude(self, obj):
+        try:
+            return obj.customer_profile.longitude
+        except ObjectDoesNotExist:
+            return None

@@ -25,7 +25,8 @@ export default function OrderAuthModal({ open, onClose }) {
         <h2 className="order-auth-modal__title">Сначала войдите в аккаунт</h2>
         <p className="order-auth-modal__text">
           Чтобы добавить позиции в корзину и оформить заказ, введите имя,
-          фамилию и номер телефона. На указанный номер придёт 4-значный код для входа.
+          фамилию и номер телефона. Мы переведём вас в Telegram-бот, где придёт
+          4-значный код для входа.
         </p>
         <div className="order-auth-modal__actions">
           <Link
@@ -33,7 +34,7 @@ export default function OrderAuthModal({ open, onClose }) {
             to="/login"
             onClick={onClose}
           >
-            Войти по SMS
+            Войти через Telegram
           </Link>
         </div>
       </div>

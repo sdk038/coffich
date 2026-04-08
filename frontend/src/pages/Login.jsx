@@ -23,6 +23,41 @@ export default function Login() {
   const [phone, setPhone] = useState(initialPhone);
   const [err, setErr] = useState(null);
   const [sendingCode, setSendingCode] = useState(false);
+  const [locationLabel, setLocationLabel] = useState('Локация не определена');
+  const [locationReady, setLocationReady] = useState(false);
+
+  function requestLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Ваш браузер не поддерживает геолокацию.'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = Number(position.coords.latitude);
+          const longitude = Number(position.coords.longitude);
+          setLocationReady(true);
+          setLocationLabel('Локация получена');
+          resolve({ latitude, longitude });
+        },
+        () => {
+          setLocationReady(false);
+          setLocationLabel('Локация не получена');
+          reject(
+            new Error(
+              'Разрешите доступ к геолокации. Доставка доступна только для пользователей из Бухары.'
+            )
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    });
+  }
 
   if (!loading && user) {
     return <Navigate to={from} replace />;
@@ -33,19 +68,31 @@ export default function Login() {
     setErr(null);
     setSendingCode(true);
     try {
+      setLocationLabel('Запрашиваем локацию…');
+      const { latitude, longitude } = await requestLocation();
       const data = await sendCode({
         phone: phone.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        latitude,
+        longitude,
       });
-      const params = new URLSearchParams({ phone: phone.trim() });
-      if (data?.devCode) params.set('devCode', String(data.devCode));
+      const params = new URLSearchParams({
+        phone: phone.trim(),
+        requestId: data.requestId,
+      });
+      if (data?.telegramBotUrl) {
+        params.set('botUrl', data.telegramBotUrl);
+      }
+      if (data?.devCode) {
+        params.set('devCode', data.devCode);
+      }
       navigate(`/verify?${params.toString()}`, {
         replace: true,
-        state: { from },
+        state: { from, telegramStatus: data },
       });
     } catch (ex) {
-      setErr(ex instanceof ApiHttpError ? ex.message : 'Не удалось отправить код');
+      setErr(ex instanceof ApiHttpError ? ex.message : 'Не удалось начать вход');
     } finally {
       setSendingCode(false);
     }
@@ -56,8 +103,8 @@ export default function Login() {
       <div className="auth-page__inner">
         <h1 className="auth-page__title">Вход</h1>
         <p className="auth-page__lead">
-          Укажите имя, фамилию и номер телефона. После нажатия кнопки откроется
-          отдельная страница для ввода кода из SMS.
+          Укажите имя, фамилию и номер телефона. Затем мы попросим геолокацию,
+          чтобы убедиться, что доставка доступна в Бухаре, и переведём вас во вход через Telegram.
         </p>
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-form__field">
@@ -69,6 +116,7 @@ export default function Login() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
+              placeholder='Введите свое имя'
             />
           </label>
           <label className="auth-form__field">
@@ -80,6 +128,7 @@ export default function Login() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
+              placeholder='Введите свою фамилию'
             />
           </label>
           <label className="auth-form__field">
@@ -88,12 +137,16 @@ export default function Login() {
               type="tel"
               className="auth-form__input"
               autoComplete="tel"
-              placeholder="+998 90 123 45 67"
+              placeholder="+998 ... .. .."
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
             />
           </label>
+          <div className={`auth-page__status${locationReady ? ' auth-page__status--ready' : ''}`}>
+            {locationLabel}
+          </div>
+          <br/>
           <button
             type="submit"
             className="btn btn--ghost auth-page__secondary"
@@ -104,7 +157,7 @@ export default function Login() {
               !phone.trim()
             }
           >
-            {sendingCode ? 'Отправка кода…' : 'Отправить код'}
+            {sendingCode ? 'Переход в Telegram…' : 'Войти'}
           </button>
 
           {err && <p className="auth-form__error">{err}</p>}

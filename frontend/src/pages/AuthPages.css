@@ -95,6 +95,25 @@
   margin: 0 0 var(--space-md);
 }
 
+.auth-page__stack {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: var(--space-lg);
+}
+
+.auth-page__status {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: rgba(224, 190, 158, 0.16);
+  color: var(--color-ink-muted);
+  line-height: 1.45;
+}
+
+.auth-page__status--ready {
+  background: rgba(91, 150, 110, 0.16);
+  color: #2b5f3b;
+}
+
 @media (max-width: 640px) {
   .auth-page {
     padding: 1.5rem 1rem 2.5rem;

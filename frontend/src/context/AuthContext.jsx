@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
     setUser(me);
   }, []);
 
-  const sendCode = useCallback(async ({ phone, firstName, lastName }) => {
+  const sendCode = useCallback(async ({ phone, firstName, lastName, latitude, longitude }) => {
     return fetchAPI('/api/auth/send-code/', {
       method: 'POST',
       skipAuth: true,
@@ -69,7 +69,15 @@ export function AuthProvider({ children }) {
         phone,
         first_name: firstName,
         last_name: lastName,
+        latitude,
+        longitude,
       }),
+    });
+  }, []);
+
+  const fetchTelegramStatus = useCallback(async (requestId) => {
+    return fetchAPI(`/api/auth/telegram-status/?requestId=${encodeURIComponent(requestId)}`, {
+      skipAuth: true,
     });
   }, []);
 
@@ -84,10 +92,11 @@ export function AuthProvider({ children }) {
       loading,
       login,
       sendCode,
+      fetchTelegramStatus,
       logout,
       refreshUser: loadMe,
     }),
-    [user, loading, login, sendCode, logout, loadMe]
+    [user, loading, login, sendCode, fetchTelegramStatus, logout, loadMe]
   );
 
   return (

@@ -156,7 +156,11 @@ SMS_SSL_VERIFY = os.environ.get("SMS_SSL_VERIFY", "1").strip()
 SMS_USE_SYSTEM_PROXY = os.environ.get("SMS_USE_SYSTEM_PROXY", "0").strip()
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "").strip()
 TELEGRAM_SSL_VERIFY = os.environ.get("TELEGRAM_SSL_VERIFY", SMS_SSL_VERIFY).strip()
 TELEGRAM_USE_SYSTEM_PROXY = os.environ.get(
     "TELEGRAM_USE_SYSTEM_PROXY", "0"
 ).strip()
+BUKHARA_SERVICE_RADIUS_KM = float(
+    os.environ.get("BUKHARA_SERVICE_RADIUS_KM", "45").strip()
+)

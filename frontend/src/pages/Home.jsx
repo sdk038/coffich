@@ -259,6 +259,7 @@ export default function Home() {
                 для утреннего кофе с собой, спокойного рабочего часа и вечерней
                 встречи с друзьями.
               </p>
+              <br/>
               <div className="hero-banner__actions">
                 <Link className="btn btn--primary" to="/contact">
                   Контакты

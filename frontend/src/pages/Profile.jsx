@@ -4,6 +4,8 @@ import './AuthPages.css';
 
 export default function Profile() {
   const { user, loading, logout } = useAuth();
+  const firstName = user?.firstName || user?.first_name || '—';
+  const lastName = user?.lastName || user?.last_name || '—';
 
   if (loading) {
     return (
@@ -24,15 +26,23 @@ export default function Profile() {
         <dl className="profile-page__dl">
           <div className="profile-page__row">
             <dt className="profile-page__dt">Имя</dt>
-            <dd className="profile-page__dd">{user.first_name || '—'}</dd>
+            <dd className="profile-page__dd">{firstName}</dd>
           </div>
           <div className="profile-page__row">
             <dt className="profile-page__dt">Фамилия</dt>
-            <dd className="profile-page__dd">{user.last_name || '—'}</dd>
+            <dd className="profile-page__dd">{lastName}</dd>
           </div>
           <div className="profile-page__row">
             <dt className="profile-page__dt">Телефон</dt>
             <dd className="profile-page__dd">{user.phone || '—'}</dd>
+          </div>
+          <div className="profile-page__row">
+            <dt className="profile-page__dt">Локация</dt>
+            <dd className="profile-page__dd">
+              {user.latitude != null && user.longitude != null
+                ? `${Number(user.latitude).toFixed(5)}, ${Number(user.longitude).toFixed(5)}`
+                : '—'}
+            </dd>
           </div>
         </dl>
         <div className="profile-page__actions">

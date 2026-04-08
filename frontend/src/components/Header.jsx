@@ -50,7 +50,7 @@ export default function Header() {
   const accountTarget = user ? '/profile' : '/login';
   const authHint = user
     ? 'Управляйте профилем и быстрее возвращайтесь к заказу.'
-    : 'Вход по имени, фамилии, номеру телефона и коду из SMS.';
+    : 'Вход по имени, фамилии, номеру телефона и коду из Telegram.';
 
   return (
     <header className="header">
@@ -102,6 +102,7 @@ export default function Header() {
               🛒
             </span>
             <span className="header__cart-label">Корзина</span>
+
             {totalCount > 0 && (
               <span className="header__cart-badge">{totalCount}</span>
             )}
