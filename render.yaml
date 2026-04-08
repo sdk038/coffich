@@ -14,7 +14,7 @@ services:
       - key: DJANGO_CORS_ALLOW_ALL_ORIGINS
         value: "1"
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
-        sync: false
+        value: https://coffich-frontend.onrender.com
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: SMSTO_API_KEY
@@ -27,10 +27,14 @@ services:
         value: https://api.sms.to
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
       - key: TELEGRAM_CHAT_ID
         sync: false
       - key: TELEGRAM_USE_SYSTEM_PROXY
         value: "0"
+      - key: BUKHARA_SERVICE_RADIUS_KM
+        value: "45"
 
   - type: static_site
     name: coffich-frontend
@@ -41,7 +45,7 @@ services:
     pullRequestPreviewsEnabled: false
     envVars:
       - key: REACT_APP_API_URL
-        sync: false
+        value: https://coffich-backend.onrender.com
     routes:
       - type: rewrite
         source: /*

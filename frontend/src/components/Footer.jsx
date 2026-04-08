@@ -24,7 +24,8 @@ export default function Footer() {
           {shop?.address && <p>{shop.address}</p>}
           {shop?.hours && <p>{shop.hours}</p>}
         </div>
-        <p className="footer__copy">© {new Date().getFullYear()} Coffich</p>
+        <p className="footer__copy">© {new Date().getFullYear()} Coffich <br/>Daler Sabirov</p>
+
       </div>
     </footer>
   );

@@ -139,8 +139,13 @@ class TelegramAuthFlowTests(TestCase):
         self.assertEqual(me_response.data["latitude"], self.bukhara_lat)
         self.assertEqual(me_response.data["longitude"], self.bukhara_lng)
 
-    @patch("accounts.views.send_auth_code_to_telegram")
-    def test_send_code_uses_existing_telegram_binding(self, mock_send_code):
+    @patch(
+        "accounts.views.build_telegram_start_url",
+        return_value="https://t.me/coffich_test_bot?start=fresh-start",
+    )
+    def test_send_code_requires_fresh_start_even_with_existing_binding(
+        self, _mock_start_url
+    ):
         user = User.objects.create_user(
             username="+998901234569",
             password="unused-password",
@@ -167,16 +172,81 @@ class TelegramAuthFlowTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data["existingUser"])
-        self.assertTrue(response.data["telegramLinked"])
-        self.assertTrue(response.data["codeSent"])
-        self.assertNotIn("telegramBotUrl", response.data)
-        mock_send_code.assert_called_once()
+        self.assertFalse(response.data["telegramLinked"])
+        self.assertFalse(response.data["codeSent"])
+        self.assertEqual(
+            response.data["telegramBotUrl"],
+            "https://t.me/coffich_test_bot?start=fresh-start",
+        )
 
         user.refresh_from_db()
         self.assertEqual(user.first_name, "Updated")
         self.assertEqual(user.last_name, "User")
         self.assertEqual(user.customer_profile.latitude, self.bukhara_lat)
         self.assertEqual(user.customer_profile.longitude, self.bukhara_lng)
+        self.assertEqual(user.telegram_binding.chat_id, "445566")
+
+    @patch("accounts.views.send_auth_code_to_telegram")
+    @patch(
+        "accounts.views.find_start_update",
+        return_value={
+            "chat_id": "999888777",
+            "username": "fresh_user",
+            "first_name": "Fresh",
+            "last_name": "User",
+        },
+    )
+    def test_status_replaces_old_binding_with_current_start(
+        self, _mock_find_start, mock_send_code
+    ):
+        user = User.objects.create_user(
+            username="+998901234573",
+            password="unused-password",
+            first_name="Old",
+            last_name="Binding",
+        )
+        TelegramBinding.objects.create(
+            user=user,
+            chat_id="111222333",
+            username="old_binding",
+        )
+        CustomerProfile.objects.create(
+            user=user,
+            latitude=self.bukhara_lat,
+            longitude=self.bukhara_lng,
+        )
+
+        send_response = self.client.post(
+            "/api/auth/send-code/",
+            {
+                "phone": "+998901234573",
+                "first_name": "Updated",
+                "last_name": "Binding",
+                "latitude": self.bukhara_lat,
+                "longitude": self.bukhara_lng,
+            },
+            format="json",
+        )
+
+        self.assertEqual(send_response.status_code, 200)
+        self.assertFalse(send_response.data["telegramLinked"])
+        self.assertFalse(send_response.data["codeSent"])
+
+        status_response = self.client.get(
+            "/api/auth/telegram-status/",
+            {
+                "requestId": send_response.data["requestId"],
+            },
+        )
+
+        self.assertEqual(status_response.status_code, 200)
+        self.assertTrue(status_response.data["telegramLinked"])
+        self.assertTrue(status_response.data["codeSent"])
+        mock_send_code.assert_called_once()
+
+        user.refresh_from_db()
+        self.assertEqual(user.telegram_binding.chat_id, "999888777")
+        self.assertEqual(user.telegram_binding.username, "fresh_user")
 
     def test_send_code_rejects_user_outside_bukhara(self):
         response = self.client.post(

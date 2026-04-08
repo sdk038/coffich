@@ -168,9 +168,7 @@ def upsert_telegram_binding(
     return binding
 
 
-def create_telegram_login_request(
-    user: User, phone: str, binding: TelegramBinding | None = None
-) -> TelegramLoginRequest:
+def create_telegram_login_request(user: User, phone: str) -> TelegramLoginRequest:
     now = timezone.now()
     TelegramLoginRequest.objects.filter(
         user=user,
@@ -183,8 +181,6 @@ def create_telegram_login_request(
         user=user,
         phone=phone,
         start_token=f"auth_{secrets.token_urlsafe(18)}",
-        telegram_binding=binding,
-        linked_at=now if binding else None,
         expires_at=now + timedelta(minutes=10),
     )
 
@@ -265,11 +261,8 @@ def start_telegram_login(user: User, phone: str, *, created: bool) -> dict:
             "Telegram-вход не настроен: укажите TELEGRAM_BOT_TOKEN."
         )
 
-    binding = get_user_telegram_binding(user)
-    login_request = create_telegram_login_request(user, phone, binding=binding)
+    login_request = create_telegram_login_request(user, phone)
     try:
-        if binding:
-            login_request = sync_telegram_login_request(login_request)
         return build_telegram_login_payload(login_request, created=created)
     except TelegramDeliveryError:
         if settings.DEBUG:

@@ -90,10 +90,12 @@ JSON в **camelCase** (совместимо с текущим React).
 Если случайно вставили ключ как `Bearer xxx`, backend автоматически уберёт `Bearer ` из значения.
 Если SMS.to не настроен или отклоняет отправку, API вернёт `503` с точной причиной (`sms`) и код не будет считаться отправленным.
 
-**Telegram заказы:** для кнопки оформления в корзине задайте:
+**Telegram заказы и вход:** задайте:
 - `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_BOT_USERNAME`
 - `TELEGRAM_CHAT_ID`
 - при необходимости `TELEGRAM_SSL_VERIFY=0` и `TELEGRAM_USE_SYSTEM_PROXY=0` для локальной отладки
+- при необходимости `BUKHARA_SERVICE_RADIUS_KM=45`
 
 ### Чтобы код приходил всем пользователям (production)
 
