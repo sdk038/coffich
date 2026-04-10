@@ -99,7 +99,7 @@ export default function VerifyCode() {
     }
   }
 
-  if (!phone || !requestId) {
+  if (!phone || (!requestId && !devCode)) {
     return <Navigate to="/login" replace />;
   }
 

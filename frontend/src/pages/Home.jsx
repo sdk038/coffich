@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchAPI, normalizeList } from '../lib/api';
+import { cachedFetchAPI, normalizeList, PUBLIC_CACHE_TTL_MS } from '../lib/api';
 import { useShop } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -32,8 +32,14 @@ export default function Home() {
     (async () => {
       try {
         const [sRes, pRes] = await Promise.all([
-          fetchAPI('/api/hero-slides/'),
-          fetchAPI('/api/products/?featured=true'),
+          cachedFetchAPI('/api/hero-slides/', {
+            skipAuth: true,
+            ttlMs: PUBLIC_CACHE_TTL_MS,
+          }),
+          cachedFetchAPI('/api/products/?featured=true', {
+            skipAuth: true,
+            ttlMs: PUBLIC_CACHE_TTL_MS,
+          }),
         ]);
         if (!cancelled) {
           const slideItems = normalizeList(sRes);

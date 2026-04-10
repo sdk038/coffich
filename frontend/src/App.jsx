@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyCode from './pages/VerifyCode';
 import Profile from './pages/Profile';
+import OrderHistory from './pages/OrderHistory';
 import './App.css';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
                 <Route path="verify" element={<VerifyCode />} />
                 <Route path="register" element={<Register />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="profile/orders" element={<OrderHistory />} />
               </Route>
             </Routes>
           </CartProvider>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchAPI, normalizeList } from '../lib/api';
+import { cachedFetchAPI, normalizeList, PUBLIC_CACHE_TTL_MS } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import ProductModal from '../components/ProductModal';
@@ -22,7 +22,10 @@ export default function Menu() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetchAPI('/api/products/');
+        const res = await cachedFetchAPI('/api/products/', {
+          skipAuth: true,
+          ttlMs: PUBLIC_CACHE_TTL_MS,
+        });
         if (!cancelled) {
           const items = normalizeList(res);
           setProducts(items.length ? items : DEMO_PRODUCTS);

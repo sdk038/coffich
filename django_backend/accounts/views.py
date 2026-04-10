@@ -21,6 +21,7 @@ from .models import (
 )
 from .serializers import (
     CheckoutOrderSerializer,
+    CustomerOrderHistorySerializer,
     LoginCodeSerializer,
     RegisterSerializer,
     SendCodeSerializer,
@@ -305,6 +306,8 @@ def create_customer_order(
 
 def start_telegram_login(user: User, phone: str, *, created: bool) -> dict:
     if not is_telegram_auth_configured():
+        if settings.DEBUG:
+            return build_dev_fallback_payload(user, phone, created=created)
         raise TelegramDeliveryError(
             "Telegram-вход не настроен: укажите TELEGRAM_BOT_TOKEN."
         )
@@ -493,6 +496,19 @@ class MeView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class OrderHistoryView(generics.ListAPIView):
+    serializer_class = CustomerOrderHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        return (
+            CustomerOrder.objects.filter(user=self.request.user)
+            .prefetch_related("items")
+            .order_by("-created_at", "-id")
+        )
 
 
 class CheckoutOrderView(APIView):

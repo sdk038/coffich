@@ -20,6 +20,13 @@ export function apiBase() {
 
 const ACCESS_KEY = 'coffich-access';
 const REFRESH_KEY = 'coffich-refresh';
+const AUTH_ACTIVITY_KEY = 'coffich-auth-activity';
+const PUBLIC_CACHE_PREFIX = 'coffich-cache:';
+const MAX_AUTH_IDLE_MS = 7 * 24 * 60 * 60 * 1000;
+export const PUBLIC_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const memoryCache = new Map();
+let refreshRequestPromise = null;
 
 export function getAccessToken() {
   try {
@@ -29,10 +36,41 @@ export function getAccessToken() {
   }
 }
 
+export function getRefreshToken() {
+  try {
+    return localStorage.getItem(REFRESH_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function markAuthActivity() {
+  try {
+    localStorage.setItem(AUTH_ACTIVITY_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+function isAuthExpiredByInactivity() {
+  try {
+    const raw = localStorage.getItem(AUTH_ACTIVITY_KEY);
+    if (!raw) return false;
+    const lastActivityAt = Number(raw);
+    if (!Number.isFinite(lastActivityAt) || lastActivityAt <= 0) {
+      return false;
+    }
+    return Date.now() - lastActivityAt > MAX_AUTH_IDLE_MS;
+  } catch {
+    return false;
+  }
+}
+
 export function setTokens(access, refresh) {
   try {
     if (access) localStorage.setItem(ACCESS_KEY, access);
     if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+    markAuthActivity();
   } catch {
     /* ignore */
   }
@@ -42,6 +80,7 @@ export function clearTokens() {
   try {
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(AUTH_ACTIVITY_KEY);
   } catch {
     /* ignore */
   }
@@ -75,10 +114,116 @@ function formatErrorFromBody(text, status) {
   return formatHttpErrorBody(text, status);
 }
 
+function cloneCachedPayload(data) {
+  if (data == null) return data;
+  return JSON.parse(JSON.stringify(data));
+}
+
+function buildUrl(path) {
+  return `${getApiBase()}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+function getPublicCacheKey(url) {
+  return `${PUBLIC_CACHE_PREFIX}${url}`;
+}
+
+function readPublicCache(url) {
+  const key = getPublicCacheKey(url);
+  const cached = memoryCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cloneCachedPayload(cached.data);
+  }
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.expiresAt <= Date.now()) {
+      localStorage.removeItem(key);
+      memoryCache.delete(key);
+      return null;
+    }
+    memoryCache.set(key, parsed);
+    return cloneCachedPayload(parsed.data);
+  } catch {
+    return null;
+  }
+}
+
+function writePublicCache(url, data, ttlMs) {
+  const key = getPublicCacheKey(url);
+  const payload = {
+    expiresAt: Date.now() + ttlMs,
+    data: cloneCachedPayload(data),
+  };
+  memoryCache.set(key, payload);
+  try {
+    localStorage.setItem(key, JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
+}
+
+async function refreshAccessToken() {
+  if (refreshRequestPromise) {
+    return refreshRequestPromise;
+  }
+  const refresh = getRefreshToken();
+  if (!refresh || isAuthExpiredByInactivity()) {
+    clearTokens();
+    return null;
+  }
+
+  refreshRequestPromise = (async () => {
+    let res;
+    try {
+      res = await fetch(buildUrl('/api/auth/refresh/'), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh }),
+      });
+    } catch {
+      clearTokens();
+      return null;
+    }
+
+    if (!res.ok) {
+      clearTokens();
+      return null;
+    }
+
+    const data = await res.json();
+    if (!data?.access) {
+      clearTokens();
+      return null;
+    }
+
+    setTokens(data.access, data.refresh || refresh);
+    return data.access;
+  })();
+
+  try {
+    return await refreshRequestPromise;
+  } finally {
+    refreshRequestPromise = null;
+  }
+}
+
 export async function fetchAPI(path, options = {}) {
-  const { skipAuth, ...rest } = options;
-  const url = `${getApiBase()}${path.startsWith('/') ? path : `/${path}`}`;
-  const token = skipAuth ? null : getAccessToken();
+  const { skipAuth, _retry, ...rest } = options;
+  const url = buildUrl(path);
+  const shouldUseAuth = !skipAuth;
+  if (shouldUseAuth && isAuthExpiredByInactivity()) {
+    clearTokens();
+  }
+
+  let token = shouldUseAuth ? getAccessToken() : null;
+  if (shouldUseAuth && !token && getRefreshToken()) {
+    token = await refreshAccessToken();
+  }
+
   let res;
   try {
     res = await fetch(url, {
@@ -95,9 +240,18 @@ export async function fetchAPI(path, options = {}) {
       0
     );
   }
+  if (res.status === 401 && shouldUseAuth && !_retry && getRefreshToken()) {
+    const refreshedAccess = await refreshAccessToken();
+    if (refreshedAccess) {
+      return fetchAPI(path, { ...options, _retry: true });
+    }
+  }
   if (!res.ok) {
     const text = await res.text();
     throw new ApiHttpError(formatErrorFromBody(text, res.status), res.status);
+  }
+  if (shouldUseAuth && (token || getRefreshToken())) {
+    markAuthActivity();
   }
   const ct = res.headers.get('content-type');
   if (ct && ct.includes('application/json')) {
@@ -111,6 +265,24 @@ export async function fetchAPI(path, options = {}) {
     );
   }
   return bodyText;
+}
+
+export async function cachedFetchAPI(path, options = {}) {
+  const { ttlMs = PUBLIC_CACHE_TTL_MS, ...rest } = options;
+  const method = String(rest.method || 'GET').toUpperCase();
+  if (method !== 'GET' || rest.skipAuth !== true) {
+    return fetchAPI(path, rest);
+  }
+
+  const url = buildUrl(path);
+  const cached = readPublicCache(url);
+  if (cached != null) {
+    return cached;
+  }
+
+  const data = await fetchAPI(path, rest);
+  writePublicCache(url, data, ttlMs);
+  return cloneCachedPayload(data);
 }
 
 /** Не показывать пользователю целую HTML-страницу (Express 404, nginx и т.д.). */

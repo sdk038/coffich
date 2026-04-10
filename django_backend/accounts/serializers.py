@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
+from .models import CustomerOrder, CustomerOrderItem
 from .utils import is_in_bukhara_delivery_zone, normalize_coordinate, normalize_phone
 
 
@@ -134,3 +135,29 @@ class UserMeSerializer(serializers.ModelSerializer):
             return obj.customer_profile.longitude
         except ObjectDoesNotExist:
             return None
+
+
+class CustomerOrderHistoryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerOrderItem
+        fields = ("id", "product_key", "title", "price", "quantity", "line_sum")
+
+
+class CustomerOrderHistorySerializer(serializers.ModelSerializer):
+    items = CustomerOrderHistoryItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CustomerOrder
+        fields = (
+            "id",
+            "status",
+            "customer_name",
+            "phone",
+            "total_sum",
+            "note",
+            "telegram_delivered_at",
+            "telegram_error",
+            "created_at",
+            "updated_at",
+            "items",
+        )

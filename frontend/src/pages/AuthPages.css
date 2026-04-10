@@ -13,6 +13,10 @@
   box-shadow: 0 18px 44px rgba(42, 31, 23, 0.08);
 }
 
+.auth-page__inner--wide {
+  max-width: 760px;
+}
+
 .auth-page__title {
   font-size: clamp(1.75rem, 4vw, 2.25rem);
   margin: 0 0 var(--space-sm);
@@ -155,4 +159,222 @@
 
 .profile-page__actions {
   margin-top: var(--space-xl);
+}
+
+.profile-page__history-link {
+  width: 100%;
+  margin: 0 0 var(--space-lg);
+  padding: 0.95rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.profile-page__history-link:hover {
+  border-color: rgba(167, 108, 66, 0.35);
+  box-shadow: 0 10px 24px rgba(42, 31, 23, 0.06);
+  transform: translateY(-1px);
+}
+
+.profile-page__history-link-icon,
+.profile-page__history-link-arrow {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-page__history-link-icon {
+  border-radius: 999px;
+  background: rgba(224, 190, 158, 0.16);
+  color: var(--color-accent);
+}
+
+.profile-page__history-link-icon svg,
+.profile-page__history-link-arrow svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.profile-page__history-link-copy {
+  flex: 1 1 auto;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.profile-page__history-link-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.profile-page__history-link-meta {
+  color: var(--color-ink-muted);
+  font-size: 0.92rem;
+}
+
+.profile-page__history-link-arrow {
+  color: var(--color-ink-muted);
+}
+
+.profile-page__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.profile-page__back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.profile-page__back-link svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.profile-page__history {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.profile-page__history-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.profile-page__history-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.profile-page__history-meta {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.92rem;
+}
+
+.profile-page__history-list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.profile-page__empty {
+  margin: 0;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.profile-order-card {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.profile-order-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: 0.9rem;
+}
+
+.profile-order-card__title {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+
+.profile-order-card__date {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 0.9rem;
+}
+
+.profile-order-card__status {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(224, 190, 158, 0.2);
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.profile-order-card__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.profile-order-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: 0.96rem;
+}
+
+.profile-order-card__note {
+  margin: 0.9rem 0 0;
+  color: var(--color-ink-muted);
+  line-height: 1.45;
+}
+
+.profile-order-card__footer {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .profile-page__history-link {
+    padding: 0.9rem;
+  }
+
+  .profile-page__topbar {
+    display: block;
+  }
+
+  .profile-page__back-link {
+    margin-bottom: 0.4rem;
+  }
+
+  .profile-page__history-head,
+  .profile-order-card__head,
+  .profile-order-card__item {
+    display: block;
+  }
+
+  .profile-order-card__status {
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+
+  .profile-order-card__item span:last-child {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-ink-muted);
+  }
 }

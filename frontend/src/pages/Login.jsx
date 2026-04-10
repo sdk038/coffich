@@ -6,6 +6,14 @@ import './AuthPages.css';
 
 const PHONE_PREFIX = '+998';
 const UZBEK_PHONE_DIGITS = 12;
+const DEV_FALLBACK_LOCATION = {
+  latitude: 39.767,
+  longitude: 64.423,
+};
+
+function isDevMode() {
+  return process.env.NODE_ENV === 'development';
+}
 
 function useInitialPhone(location) {
   return useMemo(() => {
@@ -40,6 +48,12 @@ export default function Login() {
   function requestLocation() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
+        if (isDevMode()) {
+          setLocationReady(true);
+          setLocationLabel('Локация (dev) установлена автоматически');
+          resolve(DEV_FALLBACK_LOCATION);
+          return;
+        }
         reject(new Error('Ваш браузер не поддерживает геолокацию.'));
         return;
       }
@@ -53,6 +67,12 @@ export default function Login() {
           resolve({ latitude, longitude });
         },
         () => {
+          if (isDevMode()) {
+            setLocationReady(true);
+            setLocationLabel('Локация (dev) установлена автоматически');
+            resolve(DEV_FALLBACK_LOCATION);
+            return;
+          }
           setLocationReady(false);
           setLocationLabel('Локация не получена');
           reject(

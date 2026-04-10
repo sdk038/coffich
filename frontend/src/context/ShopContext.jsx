@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { fetchAPI, normalizeOne } from '../lib/api';
+import { cachedFetchAPI, normalizeOne, PUBLIC_CACHE_TTL_MS } from '../lib/api';
 
 const ShopContext = createContext(null);
 
@@ -19,7 +19,10 @@ export function ShopProvider({ children }) {
     (async () => {
       setError(null);
       try {
-        const res = await fetchAPI('/api/shop/');
+        const res = await cachedFetchAPI('/api/shop/', {
+          skipAuth: true,
+          ttlMs: PUBLIC_CACHE_TTL_MS,
+        });
         if (!cancelled) {
           setShop(normalizeOne(res));
           setError(null);

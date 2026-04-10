@@ -409,6 +409,57 @@ class TelegramAuthFlowTests(TestCase):
         mock_send_order.assert_not_called()
         self.assertEqual(CustomerOrder.objects.count(), 0)
 
+    def test_order_history_returns_only_current_user_orders(self):
+        user = User.objects.create_user(
+            username="+998901234575",
+            password="unused-password",
+            first_name="History",
+            last_name="Owner",
+        )
+        other_user = User.objects.create_user(
+            username="+998901234576",
+            password="unused-password",
+            first_name="Other",
+            last_name="Buyer",
+        )
+        order = CustomerOrder.objects.create(
+            user=user,
+            customer_name="History Owner",
+            phone=user.username,
+            latitude=self.bukhara_lat,
+            longitude=self.bukhara_lng,
+            total_sum=54000,
+            note="Без сахара",
+        )
+        order.items.create(
+            product_key="flat-white",
+            title="Flat White",
+            price=27000,
+            quantity=2,
+            line_sum=54000,
+        )
+        CustomerOrder.objects.create(
+            user=other_user,
+            customer_name="Other Buyer",
+            phone=other_user.username,
+            latitude=self.bukhara_lat,
+            longitude=self.bukhara_lng,
+            total_sum=10000,
+        )
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get("/api/orders/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], order.id)
+        self.assertEqual(response.data[0]["status"], CustomerOrder.STATUS_NEW)
+        self.assertEqual(response.data[0]["total_sum"], 54000)
+        self.assertEqual(response.data[0]["note"], "Без сахара")
+        self.assertEqual(len(response.data[0]["items"]), 1)
+        self.assertEqual(response.data[0]["items"][0]["title"], "Flat White")
+        self.assertEqual(response.data[0]["items"][0]["quantity"], 2)
+
     def test_admin_registers_customer_and_order_models(self):
         self.assertIn(User, admin.site._registry)
         self.assertIn(CustomerProfile, admin.site._registry)
