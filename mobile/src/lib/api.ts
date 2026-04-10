@@ -1,8 +1,20 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from './config';
 
 const ACCESS_KEY = 'coffich-mobile-access';
 const REFRESH_KEY = 'coffich-mobile-refresh';
+const PUBLIC_CACHE_PREFIX = 'coffich-mobile-cache:';
+const memoryCache = new Map<string, PublicCacheEntry<any>>();
+
+export const PUBLIC_CACHE_TTL_MS = 5 * 60 * 1000;
+export const PUBLIC_STALE_TTL_MS = 24 * 60 * 60 * 1000;
+
+type PublicCacheEntry<T> = {
+  savedAt: number;
+  expiresAt: number;
+  data: T;
+};
 
 export class ApiHttpError extends Error {
   status: number;
@@ -17,6 +29,10 @@ export class ApiHttpError extends Error {
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
   token?: string | null;
+};
+
+type CacheOptions = RequestOptions & {
+  ttlMs?: number;
 };
 
 export async function requestJson<T = any>(
@@ -57,6 +73,105 @@ export async function requestJson<T = any>(
   }
 
   return (await res.text()) as T;
+}
+
+function cloneCachedPayload<T>(data: T): T {
+  if (data == null) return data;
+  return JSON.parse(JSON.stringify(data)) as T;
+}
+
+function getPublicCacheKey(path: string) {
+  return `${PUBLIC_CACHE_PREFIX}${API_BASE_URL}${path}`;
+}
+
+async function readPublicCacheEntry<T>(
+  path: string
+): Promise<PublicCacheEntry<T> | null> {
+  const key = getPublicCacheKey(path);
+  const fromMemory = memoryCache.get(key) as PublicCacheEntry<T> | undefined;
+  if (fromMemory) {
+    return fromMemory;
+  }
+
+  try {
+    const raw = await AsyncStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PublicCacheEntry<T> | null;
+    if (
+      !parsed ||
+      typeof parsed.savedAt !== 'number' ||
+      typeof parsed.expiresAt !== 'number'
+    ) {
+      await AsyncStorage.removeItem(key);
+      return null;
+    }
+    memoryCache.set(key, parsed);
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+async function writePublicCacheEntry<T>(
+  path: string,
+  data: T,
+  ttlMs = PUBLIC_CACHE_TTL_MS
+) {
+  const key = getPublicCacheKey(path);
+  const payload: PublicCacheEntry<T> = {
+    savedAt: Date.now(),
+    expiresAt: Date.now() + ttlMs,
+    data: cloneCachedPayload(data),
+  };
+  memoryCache.set(key, payload);
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(payload));
+  } catch {
+    /* ignore cache write errors */
+  }
+}
+
+export async function readCachedJson<T = any>(
+  path: string,
+  maxAgeMs = PUBLIC_STALE_TTL_MS
+): Promise<T | null> {
+  const cached = await readPublicCacheEntry<T>(path);
+  if (!cached) return null;
+  if (Date.now() - cached.savedAt > maxAgeMs) {
+    return null;
+  }
+  return cloneCachedPayload(cached.data);
+}
+
+export async function cachedRequestJson<T = any>(
+  path: string,
+  options: CacheOptions = {}
+): Promise<T> {
+  const { ttlMs = PUBLIC_CACHE_TTL_MS, method, ...rest } = options;
+  const normalizedMethod = String(method || 'GET').toUpperCase();
+
+  if (normalizedMethod !== 'GET' || rest.token) {
+    return requestJson<T>(path, { ...rest, method });
+  }
+
+  const cached = await readPublicCacheEntry<T>(path);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cloneCachedPayload(cached.data);
+  }
+
+  const data = await requestJson<T>(path, { ...rest, method: normalizedMethod });
+  await writePublicCacheEntry(path, data, ttlMs);
+  return cloneCachedPayload(data);
+}
+
+export async function refreshCachedJson<T = any>(
+  path: string,
+  options: CacheOptions = {}
+): Promise<T> {
+  const { ttlMs = PUBLIC_CACHE_TTL_MS, ...rest } = options;
+  const data = await requestJson<T>(path, rest);
+  await writePublicCacheEntry(path, data, ttlMs);
+  return cloneCachedPayload(data);
 }
 
 function formatErrorFromBody(text: string, status: number) {

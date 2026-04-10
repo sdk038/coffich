@@ -5,7 +5,7 @@ import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { StateCard } from '../components/StateCard';
 import { useCart } from '../contexts/CartContext';
-import { normalizeList, requestJson } from '../lib/api';
+import { normalizeList, readCachedJson, refreshCachedJson } from '../lib/api';
 import { colors } from '../theme/colors';
 import { heroImageUrl } from '../lib/format';
 import { normalizeHeroSlide, normalizeProduct, normalizeShop } from '../lib/normalize';
@@ -18,27 +18,60 @@ export function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadHome = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [shopRes, slidesRes, productsRes] = await Promise.all([
-        requestJson('/api/shop/'),
-        requestJson('/api/hero-slides/'),
-        requestJson('/api/products/?featured=true'),
-      ]);
-      setShop(normalizeShop(shopRes));
-      setSlides(normalizeList(slidesRes).map(normalizeHeroSlide));
-      setFeatured(normalizeList(productsRes).map(normalizeProduct));
-    } catch (ex: any) {
-      setError(ex?.message || 'Не удалось загрузить главную страницу.');
-    } finally {
-      setLoading(false);
-    }
+  const applyHomeData = useCallback((shopRes: any, slidesRes: any, productsRes: any) => {
+    setShop(normalizeShop(shopRes));
+    setSlides(normalizeList(slidesRes).map(normalizeHeroSlide));
+    setFeatured(normalizeList(productsRes).map(normalizeProduct));
   }, []);
 
+  const loadHome = useCallback(async (options?: { hydrateFromCache?: boolean }) => {
+    const hydrateFromCache = options?.hydrateFromCache === true;
+    let hasVisibleData = false;
+
+    if (!hydrateFromCache) {
+      setLoading(true);
+    }
+    setError(null);
+
+    if (hydrateFromCache) {
+      const [cachedShop, cachedSlides, cachedProducts] = await Promise.all([
+        readCachedJson('/api/shop/'),
+        readCachedJson('/api/hero-slides/'),
+        readCachedJson('/api/products/?featured=true'),
+      ]);
+
+      if (
+        cachedShop ||
+        normalizeList(cachedSlides).length > 0 ||
+        normalizeList(cachedProducts).length > 0
+      ) {
+        applyHomeData(cachedShop, cachedSlides, cachedProducts);
+        hasVisibleData = true;
+        setLoading(false);
+      }
+    }
+
+    try {
+      const [shopRes, slidesRes, productsRes] = await Promise.all([
+        refreshCachedJson('/api/shop/'),
+        refreshCachedJson('/api/hero-slides/'),
+        refreshCachedJson('/api/products/?featured=true'),
+      ]);
+      applyHomeData(shopRes, slidesRes, productsRes);
+      setError(null);
+    } catch (ex: any) {
+      if (!hasVisibleData) {
+        setError(ex?.message || 'Не удалось загрузить главную страницу.');
+      }
+    } finally {
+      if (!hasVisibleData) {
+        setLoading(false);
+      }
+    }
+  }, [applyHomeData]);
+
   useEffect(() => {
-    void loadHome();
+    void loadHome({ hydrateFromCache: true });
   }, [loadHome]);
 
   const hero = slides[0];

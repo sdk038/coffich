@@ -5,7 +5,7 @@ import { Screen } from '../components/Screen';
 import { SectionHeader } from '../components/SectionHeader';
 import { StateCard } from '../components/StateCard';
 import { useCart } from '../contexts/CartContext';
-import { normalizeList, requestJson } from '../lib/api';
+import { normalizeList, readCachedJson, refreshCachedJson } from '../lib/api';
 import { normalizeProduct } from '../lib/normalize';
 import { colors } from '../theme/colors';
 
@@ -15,21 +15,45 @@ export function MenuScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadMenu = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await requestJson('/api/products/');
-      setProducts(normalizeList(res).map(normalizeProduct));
-    } catch (ex: any) {
-      setError(ex?.message || 'Не удалось загрузить меню.');
-    } finally {
-      setLoading(false);
-    }
+  const applyMenuData = useCallback((res: any) => {
+    setProducts(normalizeList(res).map(normalizeProduct));
   }, []);
 
+  const loadMenu = useCallback(async (options?: { hydrateFromCache?: boolean }) => {
+    const hydrateFromCache = options?.hydrateFromCache === true;
+    let hasVisibleData = false;
+
+    if (!hydrateFromCache) {
+      setLoading(true);
+    }
+    setError(null);
+
+    if (hydrateFromCache) {
+      const cachedProducts = await readCachedJson('/api/products/');
+      if (normalizeList(cachedProducts).length > 0) {
+        applyMenuData(cachedProducts);
+        hasVisibleData = true;
+        setLoading(false);
+      }
+    }
+
+    try {
+      const res = await refreshCachedJson('/api/products/');
+      applyMenuData(res);
+      setError(null);
+    } catch (ex: any) {
+      if (!hasVisibleData) {
+        setError(ex?.message || 'Не удалось загрузить меню.');
+      }
+    } finally {
+      if (!hasVisibleData) {
+        setLoading(false);
+      }
+    }
+  }, [applyMenuData]);
+
   useEffect(() => {
-    void loadMenu();
+    void loadMenu({ hydrateFromCache: true });
   }, [loadMenu]);
 
   const grouped = useMemo(() => {

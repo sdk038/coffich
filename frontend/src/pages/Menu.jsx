@@ -12,10 +12,10 @@ import '../styles/pages/Menu.css';
 export default function Menu() {
   const { user } = useAuth();
   const { addItem } = useCart();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(DEMO_PRODUCTS);
   const [modalProduct, setModalProduct] = useState(null);
   const [needAuth, setNeedAuth] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
   useEffect(() => {

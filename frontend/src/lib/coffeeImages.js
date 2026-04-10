@@ -4,7 +4,7 @@
  */
 import { mediaUrl } from './api';
 
-const q = 'w=1600&q=82&auto=format&fit=crop';
+const q = 'w=1200&q=74&auto=format&fit=crop';
 
 /** Широкие кадры для hero-слайдов */
 const HERO = [
@@ -14,7 +14,7 @@ const HERO = [
   `https://images.unsplash.com/photo-1447933601403-0c6688cb5667?${q}`,
 ];
 
-const SQ = 'w=900&q=82&auto=format&fit=crop';
+const SQ = 'w=640&q=74&auto=format&fit=crop';
 
 /** Квадратные кропы для карточек напитков */
 const DRINKS = [

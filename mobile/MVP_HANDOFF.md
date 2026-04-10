@@ -32,8 +32,34 @@ Without Telegram env values:
 - Product and hero images still rely on fallback images until real assets are uploaded in backend/admin.
 
 ## Next step after MVP
-- Finalize app assets: icon, splash, launch images
-- Add `eas.json`
-- Verify iOS bundle metadata in `app.json`
-- Build first iOS test binary with EAS
-- Prepare App Store Connect listing and privacy data
+## App Store release prep
+- `eas.json` is now the source of truth for `development`, `preview`, and `production` iOS build profiles.
+- `app.json` now contains iOS build metadata (`bundleIdentifier`, `buildNumber`, location permission copy, encryption declaration).
+- Production EAS builds are expected to use:
+  `EXPO_PUBLIC_API_URL=https://coffich-backend.onrender.com`
+- Local `.env` stays for development only and should never be committed.
+
+## Apple account handoff
+1. Join / activate Apple Developer Program.
+2. Create the app in App Store Connect with bundle ID:
+   `com.sdk038.coffich`
+3. Log in with Expo:
+   `npx eas login`
+4. Initialize / link the Expo project:
+   `npx eas init`
+5. Build the first iOS binary:
+   `npm run eas:build:ios:preview`
+6. After smoke testing, build the production binary:
+   `npm run eas:build:ios:production`
+7. In App Store Connect, complete:
+   - app description
+   - screenshots
+   - support URL
+   - privacy answers
+   - age rating
+   - export compliance
+8. Upload / submit the production build to App Store Connect.
+
+## Store-facing assets
+- Current icon and splash assets are wired in `app.json`.
+- Before final App Store submission, replace them if you want stronger brand polish, but the project is already structurally ready for build and submission prep.

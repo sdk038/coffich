@@ -20,11 +20,13 @@ export default function Home() {
   const { shop } = useShop();
   const { user } = useAuth();
   const { addItem } = useCart();
-  const [slides, setSlides] = useState([]);
-  const [featured, setFeatured] = useState([]);
+  const [slides, setSlides] = useState(DEMO_HERO_SLIDES);
+  const [featured, setFeatured] = useState(
+    DEMO_PRODUCTS.filter((item) => item.featured)
+  );
   const [modalProduct, setModalProduct] = useState(null);
   const [needAuth, setNeedAuth] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
   useEffect(() => {

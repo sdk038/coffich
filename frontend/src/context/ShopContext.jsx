@@ -6,12 +6,13 @@ import {
   useState,
 } from 'react';
 import { cachedFetchAPI, normalizeOne, PUBLIC_CACHE_TTL_MS } from '../lib/api';
+import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
 
 const ShopContext = createContext(null);
 
 export function ShopProvider({ children }) {
-  const [shop, setShop] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [shop, setShop] = useState(DEMO_SHOP);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -24,13 +25,14 @@ export function ShopProvider({ children }) {
           ttlMs: PUBLIC_CACHE_TTL_MS,
         });
         if (!cancelled) {
-          setShop(normalizeOne(res));
+          const nextShop = normalizeOne(res);
+          setShop(hasMeaningfulShopContent(nextShop) ? nextShop : DEMO_SHOP);
           setError(null);
         }
       } catch (e) {
         if (!cancelled) {
-          setShop(null);
-          setError(e?.message || 'Не удалось загрузить данные кофейни');
+          setShop((current) => (hasMeaningfulShopContent(current) ? current : DEMO_SHOP));
+          setError(null);
         }
       } finally {
         if (!cancelled) setLoading(false);
