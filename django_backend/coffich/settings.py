@@ -30,6 +30,9 @@ ALLOWED_HOSTS = [
     for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
+if DEBUG and "*" not in ALLOWED_HOSTS:
+    # Local Expo builds on a physical phone hit Django over LAN using the Mac's IP.
+    ALLOWED_HOSTS.append("*")
 render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
 if render_host and render_host not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(render_host)
