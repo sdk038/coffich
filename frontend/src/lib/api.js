@@ -11,6 +11,12 @@ function getApiBase() {
   if (process.env.NODE_ENV === 'development') {
     return '';
   }
+  if (typeof window !== 'undefined') {
+    const host = String(window.location.hostname || '').toLowerCase();
+    if (host === 'coffich-frontend.onrender.com') {
+      return 'https://coffich-backend.onrender.com';
+    }
+  }
   return '';
 }
 
