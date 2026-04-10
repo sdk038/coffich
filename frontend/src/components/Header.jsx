@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import './Header.css';
+import '../styles/components/Header.css';
 
 const links = [
   { to: '/', label: 'Главная' },

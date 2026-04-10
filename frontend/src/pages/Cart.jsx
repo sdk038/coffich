@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ApiHttpError, fetchAPI } from '../lib/api';
 import { formatPriceUZS } from '../lib/formatPrice';
-import './Cart.css';
+import '../styles/pages/Cart.css';
 
 export default function Cart() {
   const { user, loading: authLoading } = useAuth();

@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import './OrderAuthModal.css';
+import '../styles/components/OrderAuthModal.css';
 
 export default function OrderAuthModal({ open, onClose }) {
   if (!open) return null;

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { resolveProductImageUrl } from '../lib/coffeeImages';
 import { formatPriceUZS } from '../lib/formatPrice';
-import './ProductModal.css';
+import '../styles/components/ProductModal.css';
 
 export default function ProductModal({
   product,

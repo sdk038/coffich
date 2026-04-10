@@ -7,7 +7,7 @@ import OrderAuthModal from '../components/OrderAuthModal';
 import { resolveProductImageUrl, MENU_PAGE_HERO_IMAGE } from '../lib/coffeeImages';
 import { DEMO_PRODUCTS } from '../lib/demoContent';
 import { formatPriceUZS } from '../lib/formatPrice';
-import './Menu.css';
+import '../styles/pages/Menu.css';
 
 export default function Menu() {
   const { user } = useAuth();

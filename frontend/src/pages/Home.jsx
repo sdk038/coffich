@@ -14,7 +14,7 @@ import {
   hasMeaningfulShopContent,
 } from '../lib/demoContent';
 import { formatPriceUZS } from '../lib/formatPrice';
-import './Home.css';
+import '../styles/pages/Home.css';
 
 export default function Home() {
   const { shop } = useShop();

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ApiHttpError } from '../lib/api';
-import './AuthPages.css';
+import '../styles/pages/AuthPages.css';
 
 const PHONE_PREFIX = '+998';
 const UZBEK_PHONE_DIGITS = 12;

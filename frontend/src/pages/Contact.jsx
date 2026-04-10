@@ -1,6 +1,6 @@
 import { useShop } from '../context/ShopContext';
 import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
-import './Contact.css';
+import '../styles/pages/Contact.css';
 
 export default function Contact() {
   const { shop, loading, error } = useShop();

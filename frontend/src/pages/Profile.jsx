@@ -1,6 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './AuthPages.css';
+import '../styles/pages/AuthPages.css';
 
 export default function Profile() {
   const { user, loading, logout } = useAuth();

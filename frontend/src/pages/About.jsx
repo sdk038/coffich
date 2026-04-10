@@ -1,7 +1,7 @@
 import { useShop } from '../context/ShopContext';
 import { resolveAboutCoverUrl } from '../lib/coffeeImages';
 import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
-import './About.css';
+import '../styles/pages/About.css';
 
 export default function About() {
   const { shop, loading, error } = useShop();

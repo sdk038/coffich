@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchAPI, normalizeList } from '../lib/api';
 import { formatPriceUZS } from '../lib/formatPrice';
-import './AuthPages.css';
+import '../styles/pages/AuthPages.css';
 
 const ORDER_STATUS_LABELS = {
   new: 'Новый',
