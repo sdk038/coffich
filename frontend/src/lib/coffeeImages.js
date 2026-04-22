@@ -46,10 +46,16 @@ function hashStr(s) {
   return Math.abs(h);
 }
 
+/** Запасное фото, если и API, и Unsplash недоступны */
+export const STATIC_PRODUCT_FALLBACK = DRINKS[0];
+
 function pickDrinkByKeywords(slug, title) {
   const t = `${slug || ''} ${title || ''}`.toLowerCase();
   if (/круассан|croissant|десерт|торт|пирог|выпечк|миндаль/i.test(t)) {
     return SWEETS[hashStr(t) % SWEETS.length];
+  }
+  if (/мед|honey|мёд/i.test(t)) {
+    return `https://images.unsplash.com/photo-1509042239860-f550ce710b93?${SQ}`;
   }
   if (/капучино|cappuccino/i.test(t)) return DRINKS[1];
   if (/флэт|flat\s*white/i.test(t)) return DRINKS[0];
@@ -60,6 +66,18 @@ function pickDrinkByKeywords(slug, title) {
   if (/мокко|mocha|раф|raf/i.test(t)) return DRINKS[4];
   if (/какао|cocoa|горячий шоколад/i.test(t)) return DRINKS[5];
   return null;
+}
+
+/**
+ * Подбор Unsplash по товару без учёта поля image из API
+ * (когда ссылка из CMS битая).
+ */
+export function resolveProductImageUrlIgnoringApiMedia(product) {
+  if (!product) return STATIC_PRODUCT_FALLBACK;
+  const key = `${product?.slug || ''}-${product?.documentId || product?.id || ''}-${product?.title || ''}`;
+  const byKw = pickDrinkByKeywords(product?.slug, product?.title);
+  if (byKw) return byKw;
+  return DRINKS[hashStr(key) % DRINKS.length];
 }
 
 /**
