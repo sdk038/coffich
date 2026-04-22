@@ -1,10 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ApiHttpError, fetchAPI } from '../lib/api';
+import {
+  resolveProductImageUrlIgnoringApiMedia,
+  STATIC_PRODUCT_FALLBACK,
+} from '../lib/coffeeImages';
 import { formatPriceUZS } from '../lib/formatPrice';
 import '../styles/pages/Cart.css';
+
+function CartLineImage({ line }) {
+  const initial = line.imageUrl || '';
+  const [src, setSrc] = useState(initial);
+
+  useEffect(() => {
+    setSrc(line.imageUrl || '');
+  }, [line.imageUrl]);
+
+  const handleError = () => {
+    const fallback = resolveProductImageUrlIgnoringApiMedia({
+      title: line.title,
+      id: line.id,
+      documentId: line.documentId,
+    });
+    setSrc((cur) => (cur !== fallback ? fallback : STATIC_PRODUCT_FALLBACK));
+  };
+
+  if (!src) {
+    return <div className="cart-line__ph" aria-hidden />;
+  }
+
+  return (
+    <img
+      className="cart-line__img"
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={handleError}
+    />
+  );
+}
 
 export default function Cart() {
   const { user, loading: authLoading } = useAuth();
@@ -84,16 +120,7 @@ export default function Cart() {
             <ul className="cart-list">
               {items.map((line) => (
                 <li key={line.key} className="cart-line">
-                  {line.imageUrl ? (
-                    <img
-                      className="cart-line__img"
-                      src={line.imageUrl}
-                      alt=""
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="cart-line__ph" aria-hidden />
-                  )}
+                  <CartLineImage line={line} />
                   <div className="cart-line__info">
                     {line.categoryName && (
                       <span className="cart-line__cat">{line.categoryName}</span>

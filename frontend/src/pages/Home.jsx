@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import ProductModal from '../components/ProductModal';
 import OrderAuthModal from '../components/OrderAuthModal';
-import { resolveHeroImageUrl, resolveProductImageUrl } from '../lib/coffeeImages';
+import ProductImage from '../components/ProductImage';
+import { resolveHeroImageUrl } from '../lib/coffeeImages';
 import {
   DEMO_HERO_SLIDES,
   DEMO_PRODUCTS,
@@ -216,8 +217,8 @@ export default function Home() {
                 className="product-card"
               >
                 <div className="product-card__media">
-                  <img
-                    src={resolveProductImageUrl(item)}
+                  <ProductImage
+                    product={item}
                     alt={item.title || 'Напиток'}
                     loading="lazy"
                   />
@@ -267,8 +268,7 @@ export default function Home() {
                 для утреннего кофе с собой, спокойного рабочего часа и вечерней
                 встречи с друзьями.
               </p>
-              <br/>
-              <div className="hero-banner__actions">
+              <div className="hero-banner__actions home__visit-actions">
                 <Link className="btn btn--primary" to="/contact">
                   Контакты
                 </Link>

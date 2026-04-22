@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { resolveProductImageUrl } from '../lib/coffeeImages';
+import ProductImage from './ProductImage';
 import { formatPriceUZS } from '../lib/formatPrice';
 import '../styles/components/ProductModal.css';
 
@@ -32,7 +32,6 @@ export default function ProductModal({
 
   if (!open || !product) return null;
 
-  const img = resolveProductImageUrl(product);
   const descHtml = product.description;
   const hasLongDesc =
     typeof descHtml === 'string' && descHtml.trim().length > 0;
@@ -66,11 +65,7 @@ export default function ProductModal({
         </button>
         <div className="product-modal__grid">
           <div className="product-modal__media">
-            {img ? (
-              <img src={img} alt="" />
-            ) : (
-              <div className="product-modal__media-ph" aria-hidden />
-            )}
+            <ProductImage product={product} alt="" />
           </div>
           <div className="product-modal__body">
             {product.category?.name && (

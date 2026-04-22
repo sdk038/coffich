@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import ProductModal from '../components/ProductModal';
 import OrderAuthModal from '../components/OrderAuthModal';
-import { resolveProductImageUrl, MENU_PAGE_HERO_IMAGE } from '../lib/coffeeImages';
+import ProductImage from '../components/ProductImage';
+import { MENU_PAGE_HERO_IMAGE } from '../lib/coffeeImages';
 import { DEMO_PRODUCTS } from '../lib/demoContent';
 import { formatPriceUZS } from '../lib/formatPrice';
 import '../styles/pages/Menu.css';
@@ -130,8 +131,8 @@ export default function Menu() {
                     className="menu-row"
                   >
                     <div className="menu-row__visual">
-                      <img
-                        src={resolveProductImageUrl(item)}
+                      <ProductImage
+                        product={item}
                         alt={item.title || ''}
                         loading="lazy"
                       />
