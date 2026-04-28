@@ -18,7 +18,7 @@ import { formatPriceUZS } from '../lib/formatPrice';
 import '../styles/pages/Home.css';
 
 export default function Home() {
-  const { shop } = useShop();
+  const { shop, locations } = useShop();
   const { user } = useAuth();
   const { addItem } = useCart();
   const [slides, setSlides] = useState(DEMO_HERO_SLIDES);
@@ -123,8 +123,16 @@ export default function Home() {
     },
   ];
 
+  const citiesLine =
+    locations && locations.length > 0
+      ? [...new Set(locations.map((l) => l.city))].join(' · ')
+      : null;
+
   const visitDetails = [
-    { label: 'Адрес', value: displayShop.address || 'Тёплая локация в центре города' },
+    {
+      label: 'Города',
+      value: citiesLine || displayShop.address || 'Тёплая локация в Узбекистане',
+    },
     { label: 'Время', value: displayShop.hours || 'Ежедневно с раннего утра до позднего вечера' },
     { label: 'Связь', value: displayShop.phone || displayShop.email || 'Напишите нам для предзаказа и вопросов' },
   ];
@@ -135,6 +143,20 @@ export default function Home() {
         <div className="hero-banner__inner">
           <div className="hero-banner__text">
             <p className="hero-banner__eyebrow">Кофейня</p>
+            {locations?.length > 0 && (
+              <div className="hero-banner__cities">
+                <ul className="hero-banner__cities-grid">
+                  {locations.slice(0, 4).map((l) => (
+                    <li key={String(l.id ?? l.slug)} className="hero-banner__city-cell">
+                      {l.city}
+                    </li>
+                  ))}
+                </ul>
+                <Link className="hero-banner__cities-cta" to="/contact">
+                  Карта и адреса
+                </Link>
+              </div>
+            )}
             <h1 className="hero-banner__title">{title}</h1>
             <p className="hero-banner__lead">{lead}</p>
             {secondary && (secondary.title || secondary.subtitle) && (

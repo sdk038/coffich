@@ -2,11 +2,11 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 
-from menu.models import Category, HeroSlide, Product, Shop
+from menu.models import Category, HeroSlide, Location, Product, Shop
 
 
 class Command(BaseCommand):
-    help = "Создать демо-данные (категории, напитки, слайды, Shop)."
+    help = "Создать демо-данные (категории, напитки, слайды, Shop, города/локации)."
 
     def handle(self, *args, **options):
         categories = {
@@ -261,11 +261,58 @@ class Command(BaseCommand):
                 defaults={**slide},
             )
 
+        demo_locations = [
+            {
+                "slug": "tashkent",
+                "city": "Ташкент",
+                "address": "ул. Шота Руставели, 12",
+                "hours": "",
+                "phone": "",
+                "map_embed_url": "",
+                "sort_order": 0,
+                "is_published": True,
+            },
+            {
+                "slug": "samarkand",
+                "city": "Самарканд",
+                "address": "ул. Регистан, 15 (исторический центр)",
+                "hours": "",
+                "phone": "",
+                "map_embed_url": "",
+                "sort_order": 10,
+                "is_published": True,
+            },
+            {
+                "slug": "namangan",
+                "city": "Наманган",
+                "address": "ул. Ойбек, 26",
+                "hours": "",
+                "phone": "",
+                "map_embed_url": "",
+                "sort_order": 20,
+                "is_published": True,
+            },
+            {
+                "slug": "fergana",
+                "city": "Фергана",
+                "address": "ул. Навои, 44",
+                "hours": "",
+                "phone": "",
+                "map_embed_url": "",
+                "sort_order": 30,
+                "is_published": True,
+            },
+        ]
+        for row in demo_locations:
+            data = {**row}
+            slug = data.pop("slug")
+            Location.objects.update_or_create(slug=slug, defaults=data)
+
         Shop.objects.update_or_create(
             pk=1,
             defaults={
                 "shop_name": "Coffich",
-                "tagline": "Кофе, десерты и спокойная атмосфера в ритме большого города.",
+                "tagline": "Кофейни в городах Узбекистана — specialty-зерно и уютная атмосфера.",
                 "about": (
                     "<p><strong>Coffich</strong> — современная городская кофейня, где "
                     "specialty-зерно, понятный сервис и тёплая атмосфера встречаются "
@@ -280,7 +327,7 @@ class Command(BaseCommand):
                     "взять напиток с собой или оформить быстрый заказ онлайн. "
                     "Именно поэтому Coffich выглядит одинаково уютно и офлайн, и на сайте.</p>"
                 ),
-                "address": "Ташкент, ул. Шота Руставели, 12",
+                "address": "Сеть Coffich: Ташкент, Самарканд, Наманган, Фергана и другие города — см. контакты.",
                 "phone": "+998 20 005 50 85",
                 "email": "sobrovv08@gmail.com",
                 "hours": "Пн–Пт: 08:00 – 22:00\nСб–Вс: 09:00 – 23:00",

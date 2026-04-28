@@ -16,12 +16,16 @@ const HERO = [
 
 const SQ = 'w=640&q=74&auto=format&fit=crop';
 
-/** Квадратные кропы для карточек напитков */
+/** Отдельные кадры — раньше «мёд» и «раф» попадали на один и тот же URL */
+const IMG_HONEY_DRINK = `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?${SQ}`;
+const IMG_RAF_DRINK = `https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?${SQ}`;
+
+/** Квадратные кропы для карточек напитков (старые позиции 2–3 вели на 404 на стороне Unsplash) */
 const DRINKS = [
   `https://images.unsplash.com/photo-1572442388796-11668a67e53d?${SQ}`,
   `https://images.unsplash.com/photo-1511920170033-f8396924c348?${SQ}`,
-  `https://images.unsplash.com/photo-1504639779993-1d15a42fdc5e?${SQ}`,
-  `https://images.unsplash.com/photo-1510591508098-sf581c05145a?${SQ}`,
+  `https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?${SQ}`,
+  `https://images.unsplash.com/photo-1509042239860-f550ce710b93?${SQ}`,
   `https://images.unsplash.com/photo-1509042239860-f550ce710b93?${SQ}`,
   `https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?${SQ}`,
 ];
@@ -55,7 +59,7 @@ function pickDrinkByKeywords(slug, title) {
     return SWEETS[hashStr(t) % SWEETS.length];
   }
   if (/мед|honey|мёд/i.test(t)) {
-    return `https://images.unsplash.com/photo-1509042239860-f550ce710b93?${SQ}`;
+    return IMG_HONEY_DRINK;
   }
   if (/капучино|cappuccino/i.test(t)) return DRINKS[1];
   if (/флэт|flat\s*white/i.test(t)) return DRINKS[0];
@@ -63,7 +67,8 @@ function pickDrinkByKeywords(slug, title) {
   if (/эспрессо|espresso|американо|americano|ристретто/i.test(t)) {
     return DRINKS[3];
   }
-  if (/мокко|mocha|раф|raf/i.test(t)) return DRINKS[4];
+  if (/раф|raf/i.test(t)) return IMG_RAF_DRINK;
+  if (/мокко|mocha/i.test(t)) return DRINKS[4];
   if (/какао|cocoa|горячий шоколад/i.test(t)) return DRINKS[5];
   return null;
 }

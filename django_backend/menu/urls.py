@@ -10,4 +10,5 @@ router.register(r"hero-slides", views.HeroSlideViewSet, basename="heroslide")
 urlpatterns = [
     path("", include(router.urls)),
     path("shop/", views.ShopView.as_view(), name="shop"),
+    path("locations/", views.LocationListView.as_view(), name="locations"),
 ]

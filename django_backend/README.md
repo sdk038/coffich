@@ -72,6 +72,7 @@ lsof -ti:8000 | xargs kill
 | GET | `/api/products/?featured=true` | Только избранные |
 | GET | `/api/hero-slides/` | Слайды (по `sort_order`) |
 | GET | `/api/shop/` | Данные кофейни |
+| GET | `/api/locations/` | Точки сети по городам Узбекистана |
 
 ### Авторизация (JWT)
 

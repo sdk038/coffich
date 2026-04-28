@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -45,6 +46,15 @@ export default function Header() {
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
 
   const accountLabel = user ? 'Профиль' : 'Аккаунт';
   const accountTarget = user ? '/profile' : '/login';
@@ -121,58 +131,66 @@ export default function Header() {
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="header__mobile" id="mobile-menu">
-          <button
-            type="button"
-            className="header__mobile-backdrop"
-            aria-label="Закрыть меню"
-            onClick={() => setMenuOpen(false)}
-          />
-          <div className="header__mobile-panel">
-            <div className="header__mobile-top">
-              <p className="header__mobile-eyebrow">Навигация</p>
-              {!loading && (
-                <NavLink to={accountTarget} className="header__mobile-account">
-                  <span className="header__mobile-account-icon">
-                    <UserIcon />
-                  </span>
-                  <span>
-                    <strong>{accountLabel}</strong>
-                    <small>{authHint}</small>
-                  </span>
-                </NavLink>
-              )}
-            </div>
+      {menuOpen &&
+        createPortal(
+          <div
+            className="header__mobile"
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Мобильное меню"
+          >
+            <button
+              type="button"
+              className="header__mobile-backdrop"
+              aria-label="Закрыть меню"
+              onClick={() => setMenuOpen(false)}
+            />
+            <div className="header__mobile-panel">
+              <div className="header__mobile-top">
+                <p className="header__mobile-eyebrow">Навигация</p>
+                {!loading && (
+                  <NavLink to={accountTarget} className="header__mobile-account">
+                    <span className="header__mobile-account-icon">
+                      <UserIcon />
+                    </span>
+                    <span>
+                      <strong>{accountLabel}</strong>
+                      <small>{authHint}</small>
+                    </span>
+                  </NavLink>
+                )}
+              </div>
 
-            <nav className="header__mobile-links" aria-label="Мобильное меню">
-              {links.map(({ to, label }) => (
+              <nav className="header__mobile-links" aria-label="Мобильное меню">
+                {links.map(({ to, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className={({ isActive }) =>
+                      `header__mobile-link${isActive ? ' header__mobile-link--active' : ''}`
+                    }
+                    end={to === '/'}
+                  >
+                    {label}
+                  </NavLink>
+                ))}
                 <NavLink
-                  key={to}
-                  to={to}
+                  to="/cart"
                   className={({ isActive }) =>
                     `header__mobile-link${isActive ? ' header__mobile-link--active' : ''}`
                   }
-                  end={to === '/'}
                 >
-                  {label}
+                  Корзина
+                  {totalCount > 0 && (
+                    <span className="header__mobile-badge">{totalCount}</span>
+                  )}
                 </NavLink>
-              ))}
-              <NavLink
-                to="/cart"
-                className={({ isActive }) =>
-                  `header__mobile-link${isActive ? ' header__mobile-link--active' : ''}`
-                }
-              >
-                Корзина
-                {totalCount > 0 && (
-                  <span className="header__mobile-badge">{totalCount}</span>
-                )}
-              </NavLink>
-            </nav>
-          </div>
-        </div>
-      )}
+              </nav>
+            </div>
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }

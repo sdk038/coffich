@@ -1,9 +1,63 @@
+/** Фолбэк до загрузки API — несколько городов Узбекистана */
+export const DEMO_LOCATIONS = [
+  {
+    id: 'demo-loc-1',
+    city: 'Ташкент',
+    slug: 'tashkent',
+    address: 'ул. Шота Руставели, 12',
+    hours: '',
+    phone: '',
+    mapEmbedUrl: '',
+  },
+  {
+    id: 'demo-loc-2',
+    city: 'Самарканд',
+    slug: 'samarkand',
+    address: 'ул. Регистан, 15 (исторический центр)',
+    hours: '',
+    phone: '',
+    mapEmbedUrl: '',
+  },
+  {
+    id: 'demo-loc-3',
+    city: 'Наманган',
+    slug: 'namangan',
+    address: 'ул. Ойбек, 26',
+    hours: '',
+    phone: '',
+    mapEmbedUrl: '',
+  },
+  {
+    id: 'demo-loc-4',
+    city: 'Фергана',
+    slug: 'fergana',
+    address: 'ул. Навои, 44',
+    hours: '',
+    phone: '',
+    mapEmbedUrl: '',
+  },
+];
+
+export function mapLocationFromApi(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    id: raw.id,
+    city: raw.city,
+    slug: raw.slug,
+    address: raw.address,
+    hours: raw.hours ?? '',
+    phone: raw.phone ?? '',
+    mapEmbedUrl: raw.map_embed_url ?? raw.mapEmbedUrl ?? '',
+    sortOrder: raw.sort_order ?? raw.sortOrder ?? 0,
+  };
+}
+
 export const DEMO_SHOP = {
   shopName: 'Coffich',
-  tagline: 'Кофе, десерты и спокойная атмосфера в ритме большого города.',
+  tagline: 'Кофейни в городах Узбекистана — specialty-зерно и уютная атмосфера.',
   about:
     '<p><strong>Coffich</strong> — городская кофейня, где specialty-зерно, комфортный сервис и тёплая атмосфера соединяются в одном пространстве. Это место для утреннего кофе с собой, дневной встречи и спокойного вечера.</p><p>В нашем меню — классические кофейные напитки, авторские позиции, холодные рецепты и свежая выпечка. Всё собрано так, чтобы можно было найти любимую классику и открыть что-то новое.</p><p>Мы любим понятные вкусы, красивую подачу и ощущение заботы в деталях — от первой чашки до финального десерта.</p>',
-  address: 'Ташкент, ул. Шота Руставели, 12',
+  address: 'Сеть Coffich: Ташкент, Самарканд, Наманган, Фергана — подробности в разделе «Контакты».',
   phone: '+998 20 005 50 85',
   email: 'sobrovv08@gmail.com',
   hours: 'Пн–Пт: 08:00 – 22:00\nСб–Вс: 09:00 – 23:00',
@@ -165,6 +219,7 @@ export function hasMeaningfulShopContent(shop) {
   return Boolean(
     shop &&
       (shop.shopName ||
+        shop.shop_name ||
         shop.tagline ||
         shop.about ||
         shop.address ||

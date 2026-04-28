@@ -93,7 +93,8 @@
 
 .menu-row {
   display: grid;
-  grid-template-columns: 88px 1fr auto;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  grid-template-areas: 'visual text aside';
   gap: var(--space-md);
   align-items: center;
   padding: var(--space-sm);
@@ -103,32 +104,57 @@
   box-shadow: 0 4px 20px var(--color-shadow);
 }
 
+.menu-row__text {
+  grid-area: text;
+  min-width: 0;
+}
+
 .menu-row__aside {
+  grid-area: aside;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-xs);
 }
 
-@media (max-width: 520px) {
+/* Узкий экран: две строки явно (иначе блок с ценой может попасть в 1-й ряд и перекрыть текст) */
+@media (max-width: 720px) {
+  .menu-section__list {
+    gap: 0.85rem;
+  }
+
   .menu-row {
-    grid-template-columns: 72px 1fr;
+    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      'visual text'
+      'aside aside';
+    align-items: start;
+    gap: 0.65rem 0.85rem;
+  }
+
+  .menu-row__visual {
+    width: 72px;
+    height: 72px;
+    align-self: start;
   }
 
   .menu-row__aside {
-    grid-column: 1 / -1;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-sm);
-    padding-top: var(--space-xs);
-    margin-top: var(--space-xs);
+    padding-top: 0.65rem;
+    margin-top: 0.15rem;
     border-top: 1px solid var(--color-border);
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
 .menu-row__visual {
+  grid-area: visual;
   width: 88px;
   height: 88px;
   border-radius: var(--radius-sm);
@@ -202,8 +228,63 @@
     margin-bottom: 1.6rem;
   }
 
+  /* Две карточки в ряд + вертикальный стек внутри — без наложений */
+  .menu-section__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
   .menu-row {
-    gap: 0.85rem;
-    padding: 0.85rem;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'visual'
+      'text'
+      'aside';
+    align-items: stretch;
+    gap: 0.45rem;
+    padding: 0.65rem 0.55rem;
+    min-width: 0;
+  }
+
+  .menu-row__visual {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .menu-row__name {
+    font-size: 0.88rem;
+    line-height: 1.25;
+  }
+
+  .menu-row__desc {
+    font-size: 0.65rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .menu-row__aside {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    padding-top: 0.45rem;
+    margin-top: 0.1rem;
+  }
+
+  .menu-row__price {
+    font-size: 0.82rem;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .menu-row__order {
+    width: 100%;
+    padding: 0.4rem 0.35rem;
+    font-size: 0.68rem;
+    text-align: center;
   }
 }

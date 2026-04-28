@@ -55,6 +55,31 @@ class HeroSlide(models.Model):
         return self.title
 
 
+class Location(models.Model):
+    """Точка сети в городе Узбекистана (адреса витрин / самовывоза)."""
+
+    city = models.CharField(max_length=120, verbose_name="Город")
+    slug = models.SlugField(max_length=140, unique=True)
+    address = models.CharField(max_length=500)
+    hours = models.TextField(blank=True, help_text="По умолчанию можно оставить пустым — подтянутся часы сети")
+    phone = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Опционально, для филиала; иначе на сайте — общий телефон",
+    )
+    map_embed_url = models.URLField(blank=True)
+    sort_order = models.IntegerField(default=0)
+    is_published = models.BooleanField(default=True, verbose_name="Показывать на сайте")
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+        verbose_name = "локация"
+        verbose_name_plural = "локации"
+
+    def __str__(self):
+        return f"{self.city} — {self.address[:40]}"
+
+
 class Shop(models.Model):
     """Единственная запись с id=1 — данные кофейни для сайта."""
 

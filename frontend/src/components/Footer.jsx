@@ -3,7 +3,7 @@ import { useShop } from '../context/ShopContext';
 import '../styles/components/Footer.css';
 
 export default function Footer() {
-  const { shop } = useShop();
+  const { shop, locations } = useShop();
   const tag = shop?.tagline || 'Кофе, десерты и тёплая пауза в ритме города.';
 
   return (
@@ -21,8 +21,14 @@ export default function Footer() {
           <Link to="/contact">Контакты</Link>
         </div>
         <div className="footer__meta">
-          {shop?.address && <p>{shop.address}</p>}
-          {shop?.hours && <p>{shop.hours}</p>}
+          {locations && locations.length > 0 ? (
+            <p className="footer__cities">
+              {locations.map((l) => l.city).join(' · ')}
+            </p>
+          ) : (
+            shop?.address && <p>{shop.address}</p>
+          )}
+          {shop?.hours && <p className="footer__hours">{shop.hours}</p>}
         </div>
         <p className="footer__copy">© {new Date().getFullYear()} Coffich <br/>Daler Sabirov</p>
 

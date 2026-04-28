@@ -1,6 +1,23 @@
 from rest_framework import serializers
 
-from .models import Category, HeroSlide, Product, Shop
+from .models import Category, HeroSlide, Location, Product, Shop
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    """Точки сети по городам Узбекистана."""
+
+    class Meta:
+        model = Location
+        fields = (
+            "id",
+            "city",
+            "slug",
+            "address",
+            "hours",
+            "phone",
+            "map_embed_url",
+            "sort_order",
+        )
 
 
 class MediaUrlMixin:

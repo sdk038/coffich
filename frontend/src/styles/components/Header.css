@@ -126,9 +126,7 @@
   background: var(--c-caramel);
 }
 
-/* ============================================================
-   ACTIONS (right side)
-   ============================================================ */
+
 .header__actions {
   display: flex;
   align-items: center;
@@ -136,7 +134,7 @@
   flex-shrink: 0;
 }
 
-/* Shared pill style for account + cart */
+
 .header__account,
 .header__cart {
   display: inline-flex;
@@ -245,14 +243,8 @@
   background: rgba(192, 124, 58, 0.08);
 }
 
-/* ============================================================
-   MOBILE MENU — hidden on desktop
-   ============================================================ */
-.header__mobile { display: none; }
 
-/* ============================================================
-   RESPONSIVE BREAKPOINTS
-   ============================================================ */
+.header__mobile { display: none; }
 @media (max-width: 860px) {
   .header__nav--desktop { display: none; }
 
@@ -262,7 +254,8 @@
     display: block;
     position: fixed;
     inset: var(--header-h, 68px) 0 0;
-    z-index: 95;
+    /* Above .header (z-index 100) when menu is portaled to document.body */
+    z-index: 120;
   }
 
   /* Backdrop */

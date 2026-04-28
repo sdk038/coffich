@@ -5,13 +5,19 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { cachedFetchAPI, normalizeOne, PUBLIC_CACHE_TTL_MS } from '../lib/api';
-import { DEMO_SHOP, hasMeaningfulShopContent } from '../lib/demoContent';
+import { cachedFetchAPI, normalizeList, normalizeOne, PUBLIC_CACHE_TTL_MS } from '../lib/api';
+import {
+  DEMO_LOCATIONS,
+  DEMO_SHOP,
+  hasMeaningfulShopContent,
+  mapLocationFromApi,
+} from '../lib/demoContent';
 
 const ShopContext = createContext(null);
 
 export function ShopProvider({ children }) {
   const [shop, setShop] = useState(DEMO_SHOP);
+  const [locations, setLocations] = useState(DEMO_LOCATIONS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -20,18 +26,45 @@ export function ShopProvider({ children }) {
     (async () => {
       setError(null);
       try {
-        const res = await cachedFetchAPI('/api/shop/', {
-          skipAuth: true,
-          ttlMs: PUBLIC_CACHE_TTL_MS,
-        });
-        if (!cancelled) {
-          const nextShop = normalizeOne(res);
-          setShop(hasMeaningfulShopContent(nextShop) ? nextShop : DEMO_SHOP);
-          setError(null);
+        try {
+          const shopRes = await cachedFetchAPI('/api/shop/', {
+            skipAuth: true,
+            ttlMs: PUBLIC_CACHE_TTL_MS,
+          });
+          const nextShop = normalizeOne(shopRes);
+          if (!cancelled) {
+            setShop(hasMeaningfulShopContent(nextShop) ? nextShop : DEMO_SHOP);
+          }
+        } catch {
+          if (!cancelled) {
+            setShop((c) => (hasMeaningfulShopContent(c) ? c : DEMO_SHOP));
+          }
         }
+
+        try {
+          const locRes = await cachedFetchAPI('/api/locations/', {
+            skipAuth: true,
+            ttlMs: PUBLIC_CACHE_TTL_MS,
+          });
+          const rawList = Array.isArray(locRes) ? locRes : normalizeList(locRes);
+          const mapped = rawList
+            .map(mapLocationFromApi)
+            .filter(Boolean)
+            .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+          if (!cancelled) {
+            setLocations(mapped.length ? mapped : DEMO_LOCATIONS);
+          }
+        } catch {
+          if (!cancelled) {
+            setLocations(DEMO_LOCATIONS);
+          }
+        }
+
+        if (!cancelled) setError(null);
       } catch (e) {
         if (!cancelled) {
           setShop((current) => (hasMeaningfulShopContent(current) ? current : DEMO_SHOP));
+          setLocations(DEMO_LOCATIONS);
           setError(null);
         }
       } finally {
@@ -44,8 +77,8 @@ export function ShopProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ shop, loading, error }),
-    [shop, loading, error]
+    () => ({ shop, locations, loading, error }),
+    [shop, locations, loading, error]
   );
 
   return (

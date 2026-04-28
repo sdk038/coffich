@@ -3,8 +3,13 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import HeroSlide, Product, Shop
-from .serializers import HeroSlideSerializer, ProductSerializer, ShopSerializer
+from .models import HeroSlide, Location, Product, Shop
+from .serializers import (
+    HeroSlideSerializer,
+    LocationSerializer,
+    ProductSerializer,
+    ShopSerializer,
+)
 
 
 def root(_request):
@@ -21,6 +26,7 @@ code{background:#f0f0f0;padding:0.1em 0.3em;border-radius:4px}</style></head>
 <li><a href="/api/products/">GET /api/products/</a></li>
 <li><a href="/api/hero-slides/">GET /api/hero-slides/</a></li>
 <li><a href="/api/shop/">GET /api/shop/</a></li>
+<li><a href="/api/locations/">GET /api/locations/</a></li>
 <li><a href="/admin/">Админка Django</a></li>
 </ul>
 </body></html>"""
@@ -54,3 +60,11 @@ class ShopView(APIView):
             defaults={"shop_name": "Coffich"},
         )
         return Response(ShopSerializer(shop, context={"request": request}).data)
+
+
+class LocationListView(APIView):
+    """Опубликованные точки сети по городам."""
+
+    def get(self, request):
+        qs = Location.objects.filter(is_published=True).order_by("sort_order", "id")
+        return Response(LocationSerializer(qs, many=True).data)
